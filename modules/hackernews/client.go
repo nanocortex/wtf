@@ -20,6 +20,7 @@ func GetStories(storyType string) ([]int, error) {
 		}
 
 		err = utils.ParseJSON(&storyIds, resp.Body)
+		defer func() { _ = resp.Body.Close() }()
 		if err != nil {
 			return storyIds, err
 		}
@@ -37,6 +38,7 @@ func GetStory(id int) (Story, error) {
 	}
 
 	err = utils.ParseJSON(&story, resp.Body)
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return story, err
 	}
@@ -61,7 +63,6 @@ func apiRequest(path string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return nil, fmt.Errorf(resp.Status)
