@@ -83,6 +83,8 @@ func (widget *Widget) content() (string, string, bool) {
 
 	var str string
 	var totalRemainingWork float64
+	var totalOriginalEstimate float64
+	var totalCompletedWork float64
 	for idx, workItem := range widget.workItems {
 
 		id := *workItem.Id
@@ -105,6 +107,17 @@ func (widget *Widget) content() (string, string, bool) {
 			itemTypeColor = "#cc293d"
 		}
 
+
+		originalEstimate := (*workItem.Fields)["Microsoft.VSTS.Scheduling.OriginalEstimate"]
+		originalEstimateDisplay := ""
+		if originalEstimate != nil {
+			totalOriginalEstimate += originalEstimate.(float64)
+			originalEstimateDisplay = fmt.Sprintf("%vh", originalEstimate)
+			if originalEstimateDisplay == "0h" {
+				originalEstimateDisplay = ""
+			}
+		}
+
 		remainingWork := (*workItem.Fields)["Microsoft.VSTS.Scheduling.RemainingWork"]
 		remainingWorkDisplay := ""
 		if remainingWork != nil {
@@ -113,11 +126,20 @@ func (widget *Widget) content() (string, string, bool) {
 			if remainingWorkDisplay == "0h" {
 				remainingWorkDisplay = ""
 			}
-
 		}
 
-		row := fmt.Sprintf(`[%s][#%v] [%s]%4s[white] [%s]%v[white] %v [grey]%v[white]`,
-			widget.RowColor(idx), id, itemTypeColor, itemType, statusColor, "•", title, remainingWorkDisplay)
+		completedWork := (*workItem.Fields)["Microsoft.VSTS.Scheduling.CompletedWork"]
+		completedWorkDisplay := ""
+		if completedWork != nil {
+			totalCompletedWork += completedWork.(float64)
+			completedWorkDisplay = fmt.Sprintf("%vh", completedWork)
+		} else {
+			completedWorkDisplay = "0h"
+		}
+
+
+		row := fmt.Sprintf(`[%s][#%v] [%s]%4s[white] [%s]%v[white] %v [blue]%v / %v[white]`,
+			widget.RowColor(idx), id, itemTypeColor, itemType, statusColor, "•", title, completedWorkDisplay, originalEstimateDisplay)
 
 		str += utils.HighlightableHelper(widget.View, row, idx, 20)
 	}

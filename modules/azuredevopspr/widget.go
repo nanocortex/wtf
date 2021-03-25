@@ -83,7 +83,7 @@ func (widget *Widget) content() (string, string, bool) {
 	}
 
 	if len(widget.pullRequests) == 0 {
-		return title, "No stories to display", false
+		return title, "No pull requests to display", false
 	}
 
 	var str string
@@ -117,14 +117,13 @@ func (widget *Widget) content() (string, string, bool) {
 		}
 
 		row := fmt.Sprintf(
-			`[%s][%s] [%s] [grey]%3s[white] %s [grey]%s %s[white]`,
+			`[%s][%s] [%s] [grey]%3s[white] %s [grey]%s[white]`,
 			widget.RowColor(idx),
 			mergeStatusDisplay,
 			acDisplay,
 			timeSinceCreation,
 			*pullRequest.Title,
 			*pullRequest.Repository.Name,
-			*pullRequest.CreatedBy.UniqueName,
 		)
 		str += utils.HighlightableHelper(widget.View, row, idx, len(*pullRequest.Title))
 	}

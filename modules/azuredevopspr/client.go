@@ -10,7 +10,6 @@ func (widget *Widget) getPullRequests(project string) ([]azrGit.GitPullRequest, 
 	var pullRequests []azrGit.GitPullRequest
 	top := widget.settings.maxRows
 
-	//u := uuid.MustParse("e2954445-077d-67dc-89a6-32d7d4f01c92")
 	u := uuid.MustParse(widget.settings.userUuid)
 
 	prs, err := widget.git.GetPullRequestsByProject(widget.ctx,
