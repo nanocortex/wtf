@@ -2,14 +2,20 @@
 
 ## Unreleased
 
+## v0.36.0
+
 ### ⚡️ Added
 
 * HealthChecks module added, by [@stone](https://github.com/stone)
 * Asana module added, by [@xntrik](https://github.com/xntrik)
+* Kubernetes module now displays the Ready Replicas and Total Replicas count, by [@LKaemmerling](https://github.com/LKaemmerling)
+* Now builds using Go 1.16, which provides support for Apple's M1 ARM hardware, by [@LKaemmerling](https://github.com/LKaemmerling)
 
 ### 🐞 Fixed
 
 * Numerous dangling response bodies closed, by [@dabcoder](https://github.com/dabcoder)
+* HackerNews read-on-response error fixed, by [@LKaemmerling](https://github.com/LKaemmerling)
+* CircleCI read-on-response error fixed, by [@dabcoder](https://github.com/dabcoder)
 
 ## v0.35.0
 

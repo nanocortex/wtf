@@ -132,7 +132,7 @@ docker cp wtf_build:/usr/local/bin/wtfutil ~/.local/bin
 docker rm wtf_build
 ```
 
-**Note:** WTF is _only_ compatible with Go versions **1.15.0** or later (due to the use of Go modules and newer standard library functions). If you would like to use `gccgo` to compile, you _must_ use `gccgo-9` or later which introduces support for Go modules.
+**Note:** WTF is _only_ compatible with Go versions **1.16.0** or later (due to the use of Go modules and newer standard library functions). If you would like to use `gccgo` to compile, you _must_ use `gccgo-9` or later which introduces support for Go modules.
 
 ### Installing via Arch User Repository
 
@@ -422,6 +422,7 @@ Dependency management in WTF is handled by [Go modules](https://github.com/golan
     <td align="center"><a href="https://github.com/zye1996"><img src="https://avatars2.githubusercontent.com/u/28901953?v=4" width="48px;" alt=""/><br /><sub><b>zye1996</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/pgaxatte"><img src="https://avatars.githubusercontent.com/u/30696904?v=4" width="48px;" alt=""/><br /><sub><b>Pierre Gaxatte</b></sub></a><br /></td>
     <td align="center"><a href="https://xntrik.wtf"><img src="https://avatars.githubusercontent.com/u/678260?v=4" width="48px;" alt=""/><br /><sub><b>Christian Frichot</b></sub></a><br /></td>
+    <td align="center"><a href="https://lukas-kaemmerling.de"><img src="https://avatars.githubusercontent.com/u/4281581?v=4" width="48px;" alt=""/><br /><sub><b>Lukas Kämmerling</b></sub></a><br /></td>
   </tr>
 </table>
 

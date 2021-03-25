@@ -1,7 +1,9 @@
 package hackernews
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,8 +21,7 @@ func GetStories(storyType string) ([]int, error) {
 			return storyIds, err
 		}
 
-		err = utils.ParseJSON(&storyIds, resp.Body)
-		defer func() { _ = resp.Body.Close() }()
+		err = utils.ParseJSON(&storyIds, bytes.NewReader(resp))
 		if err != nil {
 			return storyIds, err
 		}
@@ -37,8 +38,7 @@ func GetStory(id int) (Story, error) {
 		return story, err
 	}
 
-	err = utils.ParseJSON(&story, resp.Body)
-	defer func() { _ = resp.Body.Close() }()
+	err = utils.ParseJSON(&story, bytes.NewReader(resp))
 	if err != nil {
 		return story, err
 	}
@@ -52,7 +52,7 @@ var (
 	apiEndpoint = "https://hacker-news.firebaseio.com/v0/"
 )
 
-func apiRequest(path string) (*http.Response, error) {
+func apiRequest(path string) ([]byte, error) {
 	req, err := http.NewRequest("GET", apiEndpoint+path+".json", nil)
 	if err != nil {
 		return nil, err
@@ -64,9 +64,15 @@ func apiRequest(path string) (*http.Response, error) {
 		return nil, err
 	}
 
+	defer func() { _ = resp.Body.Close() }()
+
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return nil, fmt.Errorf(resp.Status)
 	}
 
-	return resp, nil
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
