@@ -28,7 +28,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/godbus/dbus v4.1.0+incompatible // indirect
 	github.com/google/go-github/v32 v32.1.0
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/gophercloud/gophercloud v0.5.0 // indirect
 	github.com/hekmon/cunits v2.0.1+incompatible // indirect
 	github.com/hekmon/transmissionrpc v0.0.0-20190525133028-1d589625bacd
@@ -103,7 +103,6 @@ require (
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
-	github.com/google/uuid v1.1.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/googleapis/gnostic v0.1.0 // indirect
 	github.com/gorilla/websocket v1.4.1 // indirect

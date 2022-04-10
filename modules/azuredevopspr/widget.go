@@ -65,7 +65,6 @@ func (widget *Widget) Refresh() {
 		}
 	}
 
-
 	widget.Render()
 }
 
@@ -111,13 +110,13 @@ func (widget *Widget) content() (string, string, bool) {
 		hours := time.Now().Sub(pullRequest.CreationDate.Time).Hours()
 		timeSinceCreation := ""
 		if hours > 24 {
-			timeSinceCreation = fmt.Sprintf("%dd", int(hours / 24))
+			timeSinceCreation = fmt.Sprintf("%dd", int(hours/24))
 		} else {
 			timeSinceCreation = fmt.Sprintf("%dh", int(hours))
 		}
 
 		row := fmt.Sprintf(
-			`[%s][%s] [%s] [grey]%3s[white] %s [grey]%s[white]`,
+			`[%s][%s] [%s] [grey]%4s[white] %s [blue]%s[white]`,
 			widget.RowColor(idx),
 			mergeStatusDisplay,
 			acDisplay,

@@ -82,9 +82,10 @@ func (widget *Widget) content() (string, string, bool) {
 	}
 
 	var str string
-	var totalRemainingWork float64
-	var totalOriginalEstimate float64
-	var totalCompletedWork float64
+	//var totalRemainingWork float64
+	//var totalOriginalEstimate float64
+	//var totalCompletedWork float64
+	var totalStoryPoints float64
 	for idx, workItem := range widget.workItems {
 
 		id := *workItem.Id
@@ -107,44 +108,49 @@ func (widget *Widget) content() (string, string, bool) {
 			itemTypeColor = "#cc293d"
 		}
 
+		//originalEstimate := (*workItem.Fields)["Microsoft.VSTS.Scheduling.OriginalEstimate"]
+		//originalEstimateDisplay := ""
+		//if originalEstimate != nil {
+		//	totalOriginalEstimate += originalEstimate.(float64)
+		//	originalEstimateDisplay = fmt.Sprintf("%vh", originalEstimate)
+		//	if originalEstimateDisplay == "0h" {
+		//		originalEstimateDisplay = ""
+		//	}
+		//}
 
-		originalEstimate := (*workItem.Fields)["Microsoft.VSTS.Scheduling.OriginalEstimate"]
-		originalEstimateDisplay := ""
-		if originalEstimate != nil {
-			totalOriginalEstimate += originalEstimate.(float64)
-			originalEstimateDisplay = fmt.Sprintf("%vh", originalEstimate)
-			if originalEstimateDisplay == "0h" {
-				originalEstimateDisplay = ""
-			}
+		//remainingWork := (*workItem.Fields)["Microsoft.VSTS.Scheduling.RemainingWork"]
+		//remainingWorkDisplay := ""
+		//if remainingWork != nil {
+		//	totalRemainingWork += remainingWork.(float64)
+		//	remainingWorkDisplay = fmt.Sprintf("%vh", remainingWork)
+		//	if remainingWorkDisplay == "0h" {
+		//		remainingWorkDisplay = ""
+		//	}
+		//}
+
+		//completedWork := (*workItem.Fields)["Microsoft.VSTS.Scheduling.CompletedWork"]
+		//completedWorkDisplay := ""
+		//if completedWork != nil {
+		//	totalCompletedWork += completedWork.(float64)
+		//	completedWorkDisplay = fmt.Sprintf("%vh", completedWork)
+		//} else {
+		//	completedWorkDisplay = "0h"
+		//}
+
+		storyPoints := (*workItem.Fields)["Microsoft.VSTS.Scheduling.StoryPoints"]
+		storyPointsDisplay := ""
+		if storyPoints != nil {
+			totalStoryPoints += storyPoints.(float64)
+			storyPointsDisplay = fmt.Sprintf("%v", storyPoints)
 		}
 
-		remainingWork := (*workItem.Fields)["Microsoft.VSTS.Scheduling.RemainingWork"]
-		remainingWorkDisplay := ""
-		if remainingWork != nil {
-			totalRemainingWork += remainingWork.(float64)
-			remainingWorkDisplay = fmt.Sprintf("%vh", remainingWork)
-			if remainingWorkDisplay == "0h" {
-				remainingWorkDisplay = ""
-			}
-		}
-
-		completedWork := (*workItem.Fields)["Microsoft.VSTS.Scheduling.CompletedWork"]
-		completedWorkDisplay := ""
-		if completedWork != nil {
-			totalCompletedWork += completedWork.(float64)
-			completedWorkDisplay = fmt.Sprintf("%vh", completedWork)
-		} else {
-			completedWorkDisplay = "0h"
-		}
-
-
-		row := fmt.Sprintf(`[%s][#%v] [%s]%4s[white] [%s]%v[white] %v [blue]%v / %v[white]`,
-			widget.RowColor(idx), id, itemTypeColor, itemType, statusColor, "•", title, completedWorkDisplay, originalEstimateDisplay)
+		row := fmt.Sprintf(`[%s][#%v] [%s]%4s[white] [%s]%v[white] [green]%v [white] %v`,
+			widget.RowColor(idx), id, itemTypeColor, itemType, statusColor, "•", storyPointsDisplay, title)
 
 		str += utils.HighlightableHelper(widget.View, row, idx, 20)
 	}
 
-	str += fmt.Sprintf("Total left: %.1fh", totalRemainingWork)
+	str += fmt.Sprintf("Total left: [green]%.0f[white]", totalStoryPoints)
 
 	return title, str, false
 }
