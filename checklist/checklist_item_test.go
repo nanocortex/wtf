@@ -9,6 +9,8 @@ import (
 func testChecklistItem() *ChecklistItem {
 	item := NewChecklistItem(
 		false,
+		nil,
+		make([]string, 0),
 		"test",
 		"",
 		"",

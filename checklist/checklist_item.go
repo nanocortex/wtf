@@ -1,18 +1,27 @@
 package checklist
 
+import (
+	"fmt"
+	"time"
+)
+
 // ChecklistItem is a module for creating generic checklist implementations
 // See 'Todo' for an implementation example
 type ChecklistItem struct {
 	Checked       bool
 	CheckedIcon   string
+	Date          *time.Time
+	Tags          []string
 	Text          string
 	UncheckedIcon string
 }
 
-func NewChecklistItem(checked bool, text string, checkedIcon, uncheckedIcon string) *ChecklistItem {
+func NewChecklistItem(checked bool, date *time.Time, tags []string, text string, checkedIcon, uncheckedIcon string) *ChecklistItem {
 	item := &ChecklistItem{
 		Checked:       checked,
 		CheckedIcon:   checkedIcon,
+		Date:          date,
+		Tags:          tags,
 		Text:          text,
 		UncheckedIcon: uncheckedIcon,
 	}
@@ -29,6 +38,31 @@ func (item *ChecklistItem) CheckMark() string {
 	}
 
 	return item.UncheckedIcon
+}
+
+// EditText returns the content of the edit todo form, so includes formatted date and tags
+func (item *ChecklistItem) EditText() string {
+	datePrefix := ""
+	if item.Date != nil {
+		datePrefix = fmt.Sprintf("%d-%02d-%02d", item.Date.Year(), item.Date.Month(), item.Date.Day()) + " "
+	}
+
+	tagsPrefix := item.TagString()
+
+	return datePrefix + tagsPrefix + item.Text
+}
+
+func (item *ChecklistItem) TagString() string {
+	if len(item.Tags) == 0 {
+		return ""
+	}
+
+	s := ""
+	for _, tag := range item.Tags {
+		s += "#" + tag + " "
+	}
+
+	return s
 }
 
 // Toggle changes the checked state of the ChecklistItem

@@ -2,13 +2,84 @@
 
 ## Unreleased
 
+### ⚡️ Added
+
+* [FeedReader module](https://wtfutil.com/modules/feedreader/) now displays the name of the parent feed in front of the feed item, [#1138](https://github.com/wtfutil/wtf/issues/1138) by [@igbanam](https://github.com/igbanam)
+
+## 0.41.0
+
+### 🐞 Fixed
+
+* [Kubernetes module](https://wtfutil.com/modules/kubernetes/) now uses a client per widget, rather than a global client, [#1081](https://github.com/wtfutil/wtf/issues/1081) by [@hypnoglow](https://github.com/hypnoglow)
+* [FeedReader module]() now supports basic auth, [#957](https://github.com/wtfutil/wtf/issues/957) by [@ResamVi](https://github.com/ResamVi)
+* Single words inside square brackets are displayed in the [CmdRunner module](https://wtfutil.com/modules/cmdrunner/), [#1142](https://github.com/wtfutil/wtf/issues/1142) by [@yosmoc](https://github.com/yosmoc)
+* `text_widget.tpl` generator fixed and documentation improved, by [@Quentinchampenois](https://github.com/Quentinchampenois)
+
+### 👍 Updated
+
+* ExchangeRates module has been removed. Exchange rate data is supported by the [Yahoo Finance module](https://wtfutil.com/modules/stocks/yfinance/), by [@yosmoc](https://github.com/yosmoc)
+* Replace usage of `ioutil` with `io` and `os` functions, by [@Juneezee](https://github.com/Juneezee)
+
+## v0.40.0
+
+### ⚡️ Added
+
+* Numerous improvements to the display of the Git module, [#1102](https://github.com/wtfutil/wtf/pull/1102) by [@tadeaspaule](https://github.com/tadeaspaule)
+* Updated to Go 1.17, by [nontw](https://github.com/nontw)
+* [Airbrake module](https://github.com/wtfutil/wtf/tree/master/modules/airbrake) added, by [@kyrylo](https://github.com/kyrylo)
+* Displays the battery level of connected devices, if the level can be read by `ioreg`, on MacOS, [#1108](https://github.com/wtfutil/wtf/issues/1108) by [@senorprogrammer](https://github.com/senorprogrammer)
+* Adds an `args` setting to [IP API](https://wtfutil.com/modules/ipaddress/ipapi/) for defining which fields are displayed, by [@Choromanski](https://github.com/Choromanski)
+* [Security module](https://wtfutil.com/modules/security/) no longer displays wifi info if wifi is missing or disabled, [#1124](https://github.com/wtfutil/wtf/issues/1124) by [@yosmoc](https://github.com/yosmoc)
+* `q` now quits WTF. Added as a new global hotkey, by [@thuan1412](https://github.com/thuan1412)
+* [DigitalOcean module](https://wtfutil.com/modules/digitalocean/) now properly displays the droplet region, [#1053](https://github.com/wtfutil/wtf/issues/1053) by [@yosmoc](https://github.com/yosmoc)
+* [gCal module](https://wtfutil.com/modules/google/gcal/) now supports multiple configurations with different email addresses, [#1016](https://github.com/wtfutil/wtf/issues/1016) by [@Seanstoppable](https://github.com/Seanstoppable)
+* All modules now support sub-1 second refresh intervals by specifying an optional time unit (ie: `50ms`, `20s`), [#1103](https://github.com/wtfutil/wtf/issues/1103) by [@ResamVi](https://github.com/ResamVi)
+
+### 🐞 Fixed
+
+* [GitHub module](https://wtfutil.com/modules/github/) no longer crashes when selecting different items across multiple repos, by [@Seanstoppable](https://github.com/Seanstoppable)
+* `make lint` errors fixed, [#1127](https://github.com/wtfutil/wtf/issues/1127) by [@yosmoc](https://github.com/yosmoc)
+* `jwt-go` replaced by `golang-jwt`, because security vulnerabilities, [#1121](https://github.com/wtfutil/wtf/issues/1121) by [@siddhant94](https://github.com/siddhant94)
+
+## v0.39.2
+
+Fixes a critical crashing bug that prevented WTF from launching on Intel Macs. The solution was to `go get -u golang.org/x/sys` to force a compatibility update with Go 1.17.
+
+## v0.39.0
+
+### ⚡️ Added
+
+* [Updown module](https://github.com/wtfutil/wtf/tree/master/modules/updown) added, by [@hjr265](https://github.com/hjr265)
+* Considerable improvements to the [Todo module](https://github.com/wtfutil/wtf/tree/master/modules/todo). See PR [#1100](https://github.com/wtfutil/wtf/pull/1100) for details. By [@tadeaspaule](https://github.com/tadeaspaule)
+
+### 🐞 Fixed
+
+* [Healthchecks module](https://github.com/wtfutil/wtf/tree/master/modules/healthchecks) now respects the `apiURL` setting in the config file, by [@hjr265](https://github.com/hjr265)
+* Example FeedReader RSS feed in the default config changed to a working feed, [#1096](https://github.com/wtfutil/wtf/issues/1096) by [@senorprogrammer](https://github.com/senorprogrammer)
+
+## 0.38.0
+
+### 🐞 Fixed
+
+* [FeedReader module](https://github.com/wtfutil/wtf/tree/master/modules/feedreader) handles line breaks in item titles gracefully, [#1088](https://github.com/wtfutil/wtf/issues/1088) by [@GibranHL0](https://github.com/GibranHL0)
+
+## 0.37.0
+
+### ⚡️ Added
+
+* [Yahoo Finance](https://github.com/wtfutil/wtf/tree/master/modules/stocks/yfinance) module added, by [@inetAnt](https://github.com/inetAnt)
+
+### 🐞 Fixed
+
+* Fixed error closing the Jira module response body, [#1070](https://github.com/wtfutil/wtf/issues/1070) by [@senorprogrammer](https://github.com/senorprogrammer)
+
 ## v0.36.0
 
 ### ⚡️ Added
 
-* HealthChecks module added, by [@stone](https://github.com/stone)
-* Asana module added, by [@xntrik](https://github.com/xntrik)
-* Kubernetes module now displays the Ready Replicas and Total Replicas count, by [@LKaemmerling](https://github.com/LKaemmerling)
+* [Healthchecks module](https://github.com/wtfutil/wtf/tree/master/modules/healthchecks) added, by [@stone](https://github.com/stone)
+* [Asana module](https://github.com/wtfutil/wtf/tree/master/modules/asana) added, by [@xntrik](https://github.com/xntrik)
+* [Kubernetes module](https://github.com/wtfutil/wtf/tree/master/modules/kubernetes) now displays the Ready Replicas and Total Replicas count, by [@LKaemmerling](https://github.com/LKaemmerling)
 * Now builds using Go 1.16, which provides support for Apple's M1 ARM hardware, by [@LKaemmerling](https://github.com/LKaemmerling)
 
 ### 🐞 Fixed

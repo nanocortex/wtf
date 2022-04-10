@@ -2,6 +2,8 @@ package feedreader
 
 import (
 	"fmt"
+	"html"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -22,8 +24,9 @@ const (
 
 // FeedItem represents an item returned from an RSS or Atom feed
 type FeedItem struct {
-	item   *gofeed.Item
-	viewed bool
+	item        *gofeed.Item
+	sourceTitle string
+	viewed      bool
 }
 
 // Widget is the container for RSS and Atom data
@@ -51,15 +54,28 @@ func rotateShowType(showtype ShowType) ShowType {
 }
 
 func getShowText(feedItem *FeedItem, showType ShowType) string {
-	returnValue := feedItem.item.Title
+	if feedItem == nil {
+		return ""
+	}
+
+	space := regexp.MustCompile(`\s+`)
+	title := space.ReplaceAllString(feedItem.item.Title, " ")
+	if feedItem.sourceTitle != "" {
+		title = "[" + feedItem.sourceTitle + "] " + space.ReplaceAllString(feedItem.item.Title, " ")
+	}
+
+	// Convert any escaped characters to their character representation
+	title = html.UnescapeString(title)
+
 	switch showType {
 	case SHOW_LINK:
-		returnValue = feedItem.item.Link
+		return feedItem.item.Link
 	case SHOW_CONTENT:
 		text, _ := html2text.FromString(feedItem.item.Content, html2text.Options{PrettyTables: true})
-		returnValue = strings.TrimSpace(feedItem.item.Title + "\n" + strings.TrimSpace(text))
+		return strings.TrimSpace(title + "\n" + strings.TrimSpace(text))
+	default:
+		return title
 	}
-	return returnValue
 }
 
 // NewWidget creates a new instance of a widget
@@ -122,7 +138,21 @@ func (widget *Widget) Render() {
 /* -------------------- Unexported Functions -------------------- */
 
 func (widget *Widget) fetchForFeed(feedURL string) ([]*FeedItem, error) {
-	feed, err := widget.parser.ParseURL(feedURL)
+	var (
+		feed *gofeed.Feed
+		err  error
+	)
+	if auth, isPrivateRSS := widget.settings.credentials[feedURL]; isPrivateRSS {
+		fp := gofeed.NewParser()
+		fp.AuthConfig = &gofeed.Auth{
+			Username: auth.username,
+			Password: auth.password,
+		}
+		feed, err = fp.ParseURL(feedURL)
+	} else {
+		feed, err = widget.parser.ParseURL(feedURL)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -137,8 +167,9 @@ func (widget *Widget) fetchForFeed(feedURL string) ([]*FeedItem, error) {
 		}
 
 		feedItem := &FeedItem{
-			item:   gofeedItem,
-			viewed: false,
+			item:        gofeedItem,
+			sourceTitle: feed.Title,
+			viewed:      false,
 		}
 
 		feedItems = append(feedItems, feedItem)

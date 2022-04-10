@@ -2,6 +2,7 @@ package pihole
 
 import (
 	"strings"
+	"time"
 
 	"github.com/rivo/tview"
 	"github.com/wtfutil/wtf/view"
@@ -15,13 +16,13 @@ type Widget struct {
 }
 
 // NewWidget creates a new instance of a widget
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, _ *tview.Pages, settings *Settings) *Widget {
 	widget := Widget{
 		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
 		settings:   settings,
 	}
 
-	widget.settings.RefreshInterval = 30
+	widget.settings.RefreshInterval = 30 * time.Second
 	widget.initializeKeyboardControls()
 	widget.SetDisplayFunction(widget.Refresh)
 	widget.View.SetWordWrap(true)

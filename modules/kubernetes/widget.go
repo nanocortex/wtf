@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/rivo/tview"
 	"github.com/wtfutil/wtf/utils"
@@ -13,6 +14,9 @@ import (
 // Widget contains all the config for the widget
 type Widget struct {
 	view.TextWidget
+
+	client     *clientInstance
+	clientOnce sync.Once
 
 	objects    []string
 	title      string
@@ -98,7 +102,7 @@ func (widget *Widget) Refresh() {
 
 // generateTitle generates a title for the widget
 func (widget *Widget) generateTitle() string {
-	if len(widget.title) != 0 {
+	if widget.title != "" {
 		return widget.title
 	}
 	title := "Kube"

@@ -30,7 +30,7 @@ type Bar struct {
 }
 
 // NewBarGraph creates and returns an instance of BarGraph
-func NewBarGraph(tviewApp *tview.Application, name string, commonSettings *cfg.Common) BarGraph {
+func NewBarGraph(tviewApp *tview.Application, _ string, commonSettings *cfg.Common) BarGraph {
 	widget := BarGraph{
 		Base:           NewBase(tviewApp, nil, commonSettings),
 		KeyboardWidget: NewKeyboardWidget(commonSettings),
@@ -75,7 +75,7 @@ func BuildStars(data []Bar, maxStars int, starChar string) string {
 		var starCount = int(float64(bar.Percent) * starRatio)
 
 		label := bar.ValueLabel
-		if len(label) == 0 {
+		if label == "" {
 			label = fmt.Sprint(bar.Percent)
 		}
 

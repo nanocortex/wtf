@@ -51,14 +51,14 @@ const defaultConfigFile = `wtf:
     feedreader:
       enabled: true
       feeds:
-      - http://wtfutil.com/blog/index.xml
+      - http://feeds.bbci.co.uk/news/rss.xml
       feedLimit: 10
       position:
         top: 1
         left: 1
         width: 2
         height: 1
-      updateInterval: 14400
+      refreshInterval: 14400
     ipinfo:
       colors:
         name: "lightblue"

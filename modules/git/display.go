@@ -16,20 +16,44 @@ func (widget *Widget) content() (string, string, bool) {
 		return widget.CommonSettings().Title, " Git repo data is unavailable ", false
 	}
 
-	title := fmt.Sprintf(
-		"%s - %s[white]",
-		widget.CommonSettings().Title,
-		repoData.Repository,
-	)
+	widgetTitle := ""
+	if widget.settings.lastFolderTitle {
+		pathParts := strings.Split(repoData.Repository, "/")
+		widgetTitle += pathParts[len(pathParts)-1]
+
+	} else {
+		widgetTitle = repoData.Repository
+	}
+	if widget.settings.branchInTitle {
+		widgetTitle += fmt.Sprintf(" <%s>", repoData.Branch)
+	}
+	title := ""
+	if widget.settings.showModuleName {
+		title = fmt.Sprintf(
+			"%s - %s[white]",
+			widget.CommonSettings().Title,
+			widgetTitle,
+		)
+	} else {
+		title = fmt.Sprintf(
+			"%s[white]",
+			widgetTitle,
+		)
+	}
 
 	_, _, width, _ := widget.View.GetRect()
 	str := widget.settings.PaginationMarker(len(widget.GitRepos), widget.Idx, width) + "\n"
-	str += fmt.Sprintf(" [%s]Branch[white]\n", widget.settings.Colors.Subheading)
-	str += fmt.Sprintf(" %s", repoData.Branch)
-	str += "\n"
-	str += widget.formatChanges(repoData.ChangedFiles)
-	str += "\n"
-	str += widget.formatCommits(repoData.Commits)
+	for _, v := range widget.settings.sections {
+		if v == "branch" {
+			str += fmt.Sprintf(" [%s]Branch[white]\n", widget.settings.Colors.Subheading)
+			str += fmt.Sprintf(" %s", repoData.Branch)
+		} else if v == "files" && (widget.settings.showFilesIfEmpty || len(repoData.ChangedFiles) > 1) {
+			str += widget.formatChanges(repoData.ChangedFiles)
+		} else if v == "commits" {
+			str += widget.formatCommits(repoData.Commits)
+		}
+		str += "\n"
+	}
 
 	return title, str, false
 }
@@ -49,7 +73,7 @@ func (widget *Widget) formatChanges(data []string) string {
 }
 
 func (widget *Widget) formatChange(line string) string {
-	if len(line) == 0 {
+	if line == "" {
 		return ""
 	}
 
@@ -68,7 +92,7 @@ func (widget *Widget) formatChange(line string) string {
 		line = strings.Replace(line, "R", "[purple]R[white]", 1)
 	}
 
-	return fmt.Sprintf(" %s\n", strings.Replace(line, "\"", "", -1))
+	return fmt.Sprintf(" %s\n", strings.ReplaceAll(line, "\"", ""))
 }
 
 func (widget *Widget) formatCommits(data []string) string {
@@ -82,5 +106,5 @@ func (widget *Widget) formatCommits(data []string) string {
 }
 
 func (widget *Widget) formatCommit(line string) string {
-	return fmt.Sprintf(" %s\n", strings.Replace(line, "\"", "", -1))
+	return fmt.Sprintf(" %s\n", strings.ReplaceAll(line, "\"", ""))
 }

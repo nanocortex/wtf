@@ -2,7 +2,7 @@ package pocket
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/rivo/tview"
 	"github.com/wtfutil/wtf/cfg"
@@ -21,7 +21,7 @@ type Widget struct {
 	archivedView bool
 }
 
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, _ *tview.Pages, settings *Settings) *Widget {
 	widget := Widget{
 		ScrollableWidget: view.NewScrollableWidget(tviewApp, nil, settings.Common),
 		settings:         settings,
@@ -90,7 +90,7 @@ func writeMetaDataToDisk(metaData pocketMetaData) error {
 	}
 
 	filePath := fmt.Sprintf("%s/%s", wtfConfigDir, "pocket.data")
-	err = ioutil.WriteFile(filePath, fileData, 0644)
+	err = os.WriteFile(filePath, fileData, 0644)
 
 	return err
 }

@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/olebedev/config"
 	"github.com/rivo/tview"
+	"github.com/wtfutil/wtf/modules/airbrake"
 	"github.com/wtfutil/wtf/modules/asana"
 	"github.com/wtfutil/wtf/modules/azuredevops"
 	"github.com/wtfutil/wtf/modules/azuredevopspr"
@@ -25,9 +26,7 @@ import (
 	"github.com/wtfutil/wtf/modules/digitalclock"
 	"github.com/wtfutil/wtf/modules/digitalocean"
 	"github.com/wtfutil/wtf/modules/docker"
-	"github.com/wtfutil/wtf/modules/exchangerates"
 	"github.com/wtfutil/wtf/modules/feedreader"
-	"github.com/wtfutil/wtf/modules/finnhub"
 	"github.com/wtfutil/wtf/modules/football"
 	"github.com/wtfutil/wtf/modules/gcal"
 	"github.com/wtfutil/wtf/modules/gerrit"
@@ -64,6 +63,8 @@ import (
 	"github.com/wtfutil/wtf/modules/spotify"
 	"github.com/wtfutil/wtf/modules/spotifyweb"
 	"github.com/wtfutil/wtf/modules/status"
+	"github.com/wtfutil/wtf/modules/stocks/finnhub"
+	"github.com/wtfutil/wtf/modules/stocks/yfinance"
 	"github.com/wtfutil/wtf/modules/subreddit"
 	"github.com/wtfutil/wtf/modules/textfile"
 	"github.com/wtfutil/wtf/modules/todo"
@@ -74,6 +75,7 @@ import (
 	"github.com/wtfutil/wtf/modules/twitter"
 	"github.com/wtfutil/wtf/modules/twitterstats"
 	"github.com/wtfutil/wtf/modules/unknown"
+	"github.com/wtfutil/wtf/modules/updown"
 	"github.com/wtfutil/wtf/modules/uptimerobot"
 	"github.com/wtfutil/wtf/modules/victorops"
 	"github.com/wtfutil/wtf/modules/weatherservices/arpansagovau"
@@ -106,6 +108,9 @@ func MakeWidget(
 
 	// Always in alphabetical order
 	switch moduleConfig.UString("type", moduleName) {
+	case "airbrake":
+		settings := airbrake.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = airbrake.NewWidget(tviewApp, pages, settings)
 	case "arpansagovau":
 		settings := arpansagovau.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = arpansagovau.NewWidget(tviewApp, settings)
@@ -322,6 +327,9 @@ func MakeWidget(
 	case "twitterstats":
 		settings := twitterstats.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = twitterstats.NewWidget(tviewApp, pages, settings)
+	case "updown":
+		settings := updown.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = updown.NewWidget(tviewApp, pages, settings)
 	case "uptimerobot":
 		settings := uptimerobot.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = uptimerobot.NewWidget(tviewApp, pages, settings)
@@ -334,12 +342,12 @@ func MakeWidget(
 	case "zendesk":
 		settings := zendesk.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = zendesk.NewWidget(tviewApp, pages, settings)
-	case "exchangerates":
-		settings := exchangerates.NewSettingsFromYAML(moduleName, moduleConfig, config)
-		widget = exchangerates.NewWidget(tviewApp, pages, settings)
 	case "finnhub":
 		settings := finnhub.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = finnhub.NewWidget(tviewApp, settings)
+	case "yfinance":
+		settings := yfinance.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = yfinance.NewWidget(tviewApp, settings)
 	default:
 		settings := unknown.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = unknown.NewWidget(tviewApp, settings)

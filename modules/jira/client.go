@@ -1,8 +1,10 @@
 package jira
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -10,6 +12,8 @@ import (
 	"github.com/wtfutil/wtf/utils"
 )
 
+// IssuesFor returns a collection of issues for a given collection of projects.
+// If username is provided, it scopes the issues to that person
 func (widget *Widget) IssuesFor(username string, projects []string, jql string) (*SearchResult, error) {
 	query := []string{}
 
@@ -38,7 +42,7 @@ func (widget *Widget) IssuesFor(username string, projects []string, jql string) 
 	}
 
 	searchResult := &SearchResult{}
-	err = utils.ParseJSON(searchResult, resp.Body)
+	err = utils.ParseJSON(searchResult, bytes.NewReader(resp))
 	if err != nil {
 		return nil, err
 	}
@@ -52,22 +56,28 @@ func buildJql(key string, value string) string {
 
 /* -------------------- Unexported Functions -------------------- */
 
-func (widget *Widget) jiraRequest(path string) (*http.Response, error) {
+func (widget *Widget) jiraRequest(path string) ([]byte, error) {
 	url := fmt.Sprintf("%s%s", widget.settings.domain, path)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.SetBasicAuth(widget.settings.email, widget.settings.apiKey)
-
-	httpClient := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: !widget.settings.verifyServerCertificate,
-		},
-		Proxy: http.ProxyFromEnvironment,
-	},
+	if widget.settings.personalAccessToken != "" {
+		req.Header.Set("Authorization", "Bearer "+widget.settings.personalAccessToken)
+	} else {
+		req.SetBasicAuth(widget.settings.email, widget.settings.apiKey)
 	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: !widget.settings.verifyServerCertificate,
+			},
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -78,11 +88,16 @@ func (widget *Widget) jiraRequest(path string) (*http.Response, error) {
 		return nil, fmt.Errorf(resp.Status)
 	}
 
-	return resp, nil
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
 
 func getProjectQuery(projects []string) string {
-	singleEmptyProject := len(projects) == 1 && len(projects[0]) == 0
+	singleEmptyProject := len(projects) == 1 && projects[0] == ""
 	if len(projects) == 0 || singleEmptyProject {
 		return ""
 	} else if len(projects) == 1 {
