@@ -10,7 +10,7 @@ import (
 	"github.com/wtfutil/wtf/wtf"
 )
 
-//BarGraph defines the data required to make a bar graph
+// BarGraph defines the data required to make a bar graph
 type BarGraph struct {
 	maxStars int
 	starChar string
@@ -30,9 +30,9 @@ type Bar struct {
 }
 
 // NewBarGraph creates and returns an instance of BarGraph
-func NewBarGraph(tviewApp *tview.Application, _ string, commonSettings *cfg.Common) BarGraph {
+func NewBarGraph(tviewApp *tview.Application, redrawChan chan bool, _ string, commonSettings *cfg.Common) BarGraph {
 	widget := BarGraph{
-		Base:           NewBase(tviewApp, nil, commonSettings),
+		Base:           NewBase(tviewApp, redrawChan, nil, commonSettings),
 		KeyboardWidget: NewKeyboardWidget(commonSettings),
 
 		maxStars: commonSettings.Config.UInt("graphStars", 20),
@@ -50,9 +50,10 @@ func NewBarGraph(tviewApp *tview.Application, _ string, commonSettings *cfg.Comm
 // time should be passed as a int64
 func (widget *BarGraph) BuildBars(data []Bar) {
 	widget.View.SetText(BuildStars(data, widget.maxStars, widget.starChar))
+	widget.Base.RedrawChan <- true
 }
 
-//BuildStars build the string to display
+// BuildStars build the string to display
 func BuildStars(data []Bar, maxStars int, starChar string) string {
 	var buffer bytes.Buffer
 

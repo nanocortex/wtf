@@ -15,10 +15,10 @@ type Widget struct {
 	settings  *Settings
 }
 
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
-	locationData, err := GetLocationData(settings.city)
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
+	locationData, err := getLocationData(settings.city)
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		location:  locationData,
 		lastError: err,
@@ -32,7 +32,7 @@ func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
 
 func (widget *Widget) content() (string, string, bool) {
 
-	locationData, err := GetLocationData(widget.settings.city)
+	locationData, err := getLocationData(widget.settings.city)
 	widget.location = locationData
 	widget.lastError = err
 

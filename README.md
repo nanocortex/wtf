@@ -19,9 +19,33 @@ Awesome! [See here](https://wtfutil.com/sponsors/exit_message/) for how you can 
 ## Sponsored by
 
 <p>
-	<a href="https://airbrake.io/?utm_medium=sponsor&utm_source=WTFutill&utm_content=airbrake-home-page&utm_campaign=2021-sponsorships" target=_blank>
-		<img src="./images/sponsors/airbrake.png?raw=true" height="60" title="Airbrake" alt="Airbrake" />
-	</a>
+  <table>
+    <tr>
+      <td rowspan="2">
+        <strong>Warp.dev</strong>
+        <br />
+        <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=wtf_20230929 " target="_blank">
+          <img src="./images/sponsors/warp2.png?raw=true" height="302" width="538" title="Warp" alt="Warp" />
+        </a>
+      </td>
+      <td>
+        <strong>Robusta.dev</strong>
+        <br />
+        <a href="https://home.robusta.dev/?utm_source=wtfutil&utm_medium=oss-sponsorship&utm_id=wtfutil-sponsorship" target=_blank>
+		      <img src="./images/sponsors/robusta.png?raw=true" height="60" title="Robusta.dev" alt="Robusta.dev" />
+	      </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Airbrake</strong>
+        <br />
+	      <a href="https://airbrake.io/?utm_medium=sponsor&utm_source=WTFutill&utm_content=airbrake-home-page&utm_campaign=2021-sponsorships" target=_blank>
+		      <img src="./images/sponsors/airbrake.png?raw=true" height="60" title="Airbrake" alt="Airbrake" />
+	      </a>
+      </td>
+    </tr>
+  <table>
 </p>
 
 <hr />
@@ -35,7 +59,7 @@ Awesome! [See here](https://wtfutil.com/sponsors/exit_message/) for how you can 
     * [Installing from Source](#installing-from-source)
     * [Running via Docker](#running-via-docker)
 * [Communication](#communication)
-    * [Slack](#slack)
+    * [GitHub Discussions](#github-discussions)
     * [Twitter](#twitter)
 * [Documentation](#documentation)
 * [Modules](#modules)
@@ -168,11 +192,11 @@ docker run -it -v path/to/config.yml:/config/config.yml wtfutil --config=/config
 
 ## Communication
 
-### Slack
+### GitHub Discussions
 
-If you’re a member of the Gophers Slack community (https://invite.slack.golangbridge.org) there’s a WTFUtil channel you should join for all your WTF questions, development conversations, etc.
+Conversations, ideas, discussions are done on [GitHub Discussions](https://github.com/wtfutil/wtf/discussions).
 
-Find #wtfutil on https://gophers.slack.com/ and join us.
+Formerly they were on Slack; that channel has been deprecated.
 
 ### Twitter
 
@@ -456,6 +480,24 @@ Dependency management in WTF is handled by [Go modules](https://github.com/golan
     <td align="center"><a href="https://juneezee.github.io/"><img src="https://avatars.githubusercontent.com/u/20135478?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Eng Zer Jun</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/Quentinchampenois"><img src="https://avatars.githubusercontent.com/u/26109239?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Quentin Champ</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/igbanam"><img src="https://avatars.githubusercontent.com/u/390059?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Igbanam Ogbuluijah</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/gcg"><img src="https://avatars.githubusercontent.com/u/811685?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Guney Can Gokoglu</b></sub></a><br /></td>
+    <td align="center"><a href="https://des.wtf/"><img src="https://avatars.githubusercontent.com/u/6239776?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Des Preston</b></sub></a><br /></td>
+    <td align="center"><a href="https://labesse.fr/"><img src="https://avatars.githubusercontent.com/u/5497623?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Labesse Kévin</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/asadali"><img src="https://avatars.githubusercontent.com/u/3761605?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Asad</b></sub></a><br /></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://mrkc.me/"><img src="https://avatars.githubusercontent.com/u/261361?v=4?s=48" width="48px;" alt=""/><br /><sub><b>markcaudill</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/fabge"><img src="https://avatars.githubusercontent.com/u/21140791?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Fabian Geiger</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/dhutty-numo"><img src="https://avatars.githubusercontent.com/u/62157262?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Duncan Hutty</b></sub></a><br /></td>
+    <td align="center"><a href="https://gliptak.github.io/"><img src="https://avatars.githubusercontent.com/u/50109?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Gábor Lipták</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/Bizzaro"><img src="https://avatars.githubusercontent.com/u/10475262?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Albert Fung</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/pliski"><img src="https://avatars.githubusercontent.com/u/6731247?v=4?s=48" width="48px;" alt=""/><br /><sub><b>pliski</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/zyrre"><img src="https://avatars.githubusercontent.com/u/2995732?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Peter Krantz</b></sub></a><br /></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://www.youtube.com/c/bashbunni"><img src="https://avatars.githubusercontent.com/u/15822994?v=4?s=48" width="48px;" alt=""/><br /><sub><b>bashbunni</b></sub></a><br /></td>
+    <td align="center"><a href="http://ronrecord.com/"><img src="https://avatars.githubusercontent.com/u/940230?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Ronald Record</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/Crash129"><img src="https://avatars.githubusercontent.com/u/10711762?v=4?s=48" width="48px;" alt=""/><br /><sub><b>Crash129</b></sub></a><br /></td>
   </tr>
 </table>
 

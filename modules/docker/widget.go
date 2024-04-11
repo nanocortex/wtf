@@ -16,15 +16,15 @@ type Widget struct {
 	displayBuffer string
 }
 
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, pages, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, pages, settings.Common),
 		settings:   settings,
 	}
 
 	widget.View.SetScrollable(true)
 
-	cli, err := client.NewEnvClient()
+	cli, err := client.NewClientWithOpts()
 	if err != nil {
 		widget.displayBuffer = errors.Wrap(err, "could not create client").Error()
 	} else {

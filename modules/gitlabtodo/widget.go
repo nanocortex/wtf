@@ -18,9 +18,9 @@ type Widget struct {
 	err          error
 }
 
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, settings *Settings) *Widget {
 	widget := &Widget{
-		ScrollableWidget: view.NewScrollableWidget(tviewApp, pages, settings.Common),
+		ScrollableWidget: view.NewScrollableWidget(tviewApp, redrawChan, pages, settings.Common),
 
 		settings: settings,
 	}
@@ -86,7 +86,7 @@ func (widget *Widget) getTodos() ([]*gitlab.Todo, error) {
 func (widget *Widget) trimTodoBody(body string) string {
 	r := []rune(body)
 
-	// Cut at first occurence of a newline
+	// Cut at first occurrence of a newline
 	for i, a := range r {
 		if a == '\n' {
 			return string(r[:i])

@@ -1,7 +1,7 @@
 package mercurial
 
 import (
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/wtfutil/wtf/utils"
 	"github.com/wtfutil/wtf/view"
@@ -25,10 +25,10 @@ type Widget struct {
 }
 
 // NewWidget creates a new instance of a widget
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, settings *Settings) *Widget {
 	widget := Widget{
 		MultiSourceWidget: view.NewMultiSourceWidget(settings.Common, "repository", "repositories"),
-		TextWidget:        view.NewTextWidget(tviewApp, pages, settings.Common),
+		TextWidget:        view.NewTextWidget(tviewApp, redrawChan, pages, settings.Common),
 
 		tviewApp: tviewApp,
 		pages:    pages,
@@ -100,11 +100,9 @@ func (widget *Widget) addCancelButton(form *tview.Form) {
 }
 
 func (widget *Widget) modalFocus(form *tview.Form) {
-	widget.tviewApp.QueueUpdateDraw(func() {
-		frame := widget.modalFrame(form)
-		widget.pages.AddPage("modal", frame, false, true)
-		widget.tviewApp.SetFocus(frame)
-	})
+	frame := widget.modalFrame(form)
+	widget.pages.AddPage("modal", frame, false, true)
+	widget.tviewApp.SetFocus(frame)
 }
 
 func (widget *Widget) modalForm(lbl, text string) *tview.Form {

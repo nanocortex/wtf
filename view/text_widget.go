@@ -14,17 +14,13 @@ type TextWidget struct {
 	*KeyboardWidget
 
 	View *tview.TextView
-
-	tviewApp *tview.Application
 }
 
 // NewTextWidget creates and returns an instance of TextWidget
-func NewTextWidget(tviewApp *tview.Application, pages *tview.Pages, commonSettings *cfg.Common) TextWidget {
+func NewTextWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, commonSettings *cfg.Common) TextWidget {
 	widget := TextWidget{
-		Base:           NewBase(tviewApp, pages, commonSettings),
+		Base:           NewBase(tviewApp, redrawChan, pages, commonSettings),
 		KeyboardWidget: NewKeyboardWidget(commonSettings),
-
-		tviewApp: tviewApp,
 	}
 
 	widget.View = widget.createView(widget.bordered)
@@ -45,14 +41,14 @@ func (widget *TextWidget) TextView() *tview.TextView {
 
 // Redraw forces a refresh of the onscreen text content of this widget
 func (widget *TextWidget) Redraw(data func() (string, string, bool)) {
-	widget.tviewApp.QueueUpdateDraw(func() {
-		title, content, wrap := data()
+	title, content, wrap := data()
 
-		widget.View.Clear()
-		widget.View.SetWrap(wrap)
-		widget.View.SetTitle(widget.ContextualTitle(title))
-		widget.View.SetText(strings.TrimRight(content, "\n"))
-	})
+	widget.View.Clear()
+	widget.View.SetWrap(wrap)
+	widget.View.SetTitle(widget.ContextualTitle(title))
+	widget.View.SetText(strings.TrimRight(content, "\n"))
+
+	widget.RedrawChan <- true
 }
 
 /* -------------------- Unexported Functions -------------------- */

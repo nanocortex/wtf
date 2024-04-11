@@ -21,9 +21,9 @@ type Widget struct {
 	archivedView bool
 }
 
-func NewWidget(tviewApp *tview.Application, _ *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, _ *tview.Pages, settings *Settings) *Widget {
 	widget := Widget{
-		ScrollableWidget: view.NewScrollableWidget(tviewApp, nil, settings.Common),
+		ScrollableWidget: view.NewScrollableWidget(tviewApp, redrawChan, nil, settings.Common),
 		settings:         settings,
 		client:           NewClient(settings.consumerKey, "http://localhost"),
 		archivedView:     false,
@@ -115,13 +115,14 @@ func readMetaDataFromDisk() (pocketMetaData, error) {
 }
 
 /*
-	Authorization workflow is documented at https://getpocket.com/developer/docs/authentication
-	broken to 4 steps :
-		1- Obtain a platform consumer key from http://getpocket.com/developer/apps/new.
-		2- Obtain a request token
-		3- Redirect user to Pocket to continue authorization
-		4- Receive the callback from Pocket, this wont be used
-		5- Convert a request token into a Pocket access token
+Authorization workflow is documented at https://getpocket.com/developer/docs/authentication
+broken to 4 steps :
+
+	1- Obtain a platform consumer key from http://getpocket.com/developer/apps/new.
+	2- Obtain a request token
+	3- Redirect user to Pocket to continue authorization
+	4- Receive the callback from Pocket, this wont be used
+	5- Convert a request token into a Pocket access token
 */
 func (widget *Widget) authorizeWorkFlow() (string, string, bool) {
 	title := widget.CommonSettings().Title

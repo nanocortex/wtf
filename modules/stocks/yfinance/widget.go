@@ -17,9 +17,9 @@ type Widget struct {
 }
 
 // NewWidget creates and returns an instance of Widget
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.common),
 
 		settings: settings,
 	}
@@ -60,7 +60,7 @@ func (widget *Widget) content() string {
 			yq.Symbol,
 			fmt.Sprintf("%8.2f %s", yq.MarketPrice, yq.Currency),
 			GetTrendIcon(yq.Trend),
-			fmt.Sprintf("[%s]%+6.2f (%+5.2f%%)", colors[yq.Trend], yq.MarketChange, yq.MarketChangePct),
+			fmt.Sprintf("[%s]%+6.2f (%+5.2f%%)[white]", colors[yq.Trend], yq.MarketChange, yq.MarketChangePct),
 		})
 	}
 

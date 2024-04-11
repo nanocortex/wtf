@@ -29,9 +29,9 @@ type Widget struct {
 }
 
 // NewWidget Make new instance of widget
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		settings:    settings,
 		summaryList: summaryList{},
@@ -104,22 +104,19 @@ func (widget *Widget) updateSummary() {
 			request := makeRequest(baseCurrency.name, mCurrency.name)
 			response, err := client.Do(request)
 
+			ok = true
+			errorText = ""
+
 			if err != nil {
 				ok = false
 				errorText = "Please Check Your Internet Connection!"
 				break
-			} else {
-				ok = true
-				errorText = ""
 			}
 
 			if response.StatusCode != http.StatusOK {
 				errorText = response.Status
 				ok = false
 				break
-			} else {
-				ok = true
-				errorText = ""
 			}
 
 			defer func() { _ = response.Body.Close() }()
@@ -153,7 +150,7 @@ func (widget *Widget) updateSummary() {
 
 func makeRequest(baseName, marketName string) *http.Request {
 	url := fmt.Sprintf("%s?market=%s-%s", baseURL, baseName, marketName)
-	request, _ := http.NewRequest("GET", url, nil)
+	request, _ := http.NewRequest("GET", url, http.NoBody)
 
 	return request
 }

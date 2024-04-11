@@ -66,9 +66,9 @@ var argLookup = map[string]string{
 }
 
 // NewWidget constructor
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		settings: settings,
 	}
@@ -85,10 +85,10 @@ func (widget *Widget) Refresh() {
 	widget.Redraw(func() (string, string, bool) { return widget.CommonSettings().Title, widget.result, false })
 }
 
-//this method reads the config and calls ipinfo for ip information
+// this method reads the config and calls ipinfo for ip information
 func (widget *Widget) ipinfo() {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://ip-api.com/json?fields=66846719", nil)
+	req, err := http.NewRequest("GET", "http://ip-api.com/json?fields=66846719", http.NoBody)
 	if err != nil {
 		widget.result = err.Error()
 		return

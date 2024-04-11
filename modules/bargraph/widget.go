@@ -21,9 +21,9 @@ type Widget struct {
 }
 
 // NewWidget Make new instance of widget
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		BarGraph: view.NewBarGraph(tviewApp, "Sample Bar Graph", settings.Common),
+		BarGraph: view.NewBarGraph(tviewApp, redrawChan, "Sample Bar Graph", settings.Common),
 
 		tviewApp: tviewApp,
 	}
@@ -68,15 +68,5 @@ func (widget *Widget) Refresh() {
 	}
 
 	widget.View.Clear()
-
-	widget.tviewApp.QueueUpdateDraw(func() {
-		display(widget)
-	})
-
-}
-
-/* -------------------- Unexported Functions -------------------- */
-
-func display(widget *Widget) {
 	MakeGraph(widget)
 }

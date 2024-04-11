@@ -13,8 +13,8 @@ import (
 const module = "Airbrake"
 
 var emojis = map[string]string{
-	"bug":             "🐛",
-	"bell with slash": "🔕",
+	"bug":             "ð",
+	"bell with slash": "ð",
 }
 
 type ShowType int
@@ -72,8 +72,8 @@ func (g *Group) Type() string {
 }
 
 func (g *Group) Message() string {
-	error := g.Errors[0]
-	return strings.ReplaceAll(error.Message, "\n", ". ")
+	err := g.Errors[0]
+	return strings.ReplaceAll(err.Message, "\n", ". ")
 }
 
 func (g *Group) File() string {
@@ -113,9 +113,9 @@ func rotateShowType(showtype ShowType) ShowType {
 	return returnValue
 }
 
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, settings *Settings) *Widget {
 	widget := Widget{
-		ScrollableWidget: view.NewScrollableWidget(tviewApp, pages, settings.Common),
+		ScrollableWidget: view.NewScrollableWidget(tviewApp, redrawChan, pages, settings.Common),
 
 		app:      tviewApp,
 		settings: settings,

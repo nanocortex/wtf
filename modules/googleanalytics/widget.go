@@ -11,9 +11,9 @@ type Widget struct {
 	settings *Settings
 }
 
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		settings: settings,
 	}
@@ -22,7 +22,7 @@ func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
 }
 
 func (widget *Widget) Refresh() {
-	websiteReports := widget.Fetch()
+	websiteReports := widget.fetch()
 	contentTable := widget.createTable(websiteReports)
 
 	widget.Redraw(func() (string, string, bool) { return widget.CommonSettings().Title, contentTable, false })

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/wtfutil/wtf/cfg"
 	"github.com/wtfutil/wtf/checklist"
@@ -33,13 +33,17 @@ type Widget struct {
 	showTagPrefix string
 	showFilter    string
 	tviewApp      *tview.Application
+	Error         string
+
 	view.ScrollableWidget
+
+	// redrawChan chan bool
 }
 
 // NewWidget creates a new instance of a widget
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, settings *Settings) *Widget {
 	widget := Widget{
-		ScrollableWidget: view.NewScrollableWidget(tviewApp, pages, settings.Common),
+		ScrollableWidget: view.NewScrollableWidget(tviewApp, redrawChan, pages, settings.Common),
 
 		tviewApp:      tviewApp,
 		settings:      settings,
@@ -47,6 +51,8 @@ func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settin
 		showTagPrefix: "",
 		list:          checklist.NewChecklist(settings.Sigils.Checkbox.Checked, settings.Sigils.Checkbox.Unchecked),
 		pages:         pages,
+
+		// redrawChan: redrawChan,
 	}
 
 	widget.init()
@@ -75,7 +81,11 @@ func (widget *Widget) SelectedItem() *checklist.ChecklistItem {
 
 // Refresh updates the data for this widget and displays it onscreen
 func (widget *Widget) Refresh() {
-	widget.load()
+	widget.Error = ""
+	err := widget.load()
+	if err != nil {
+		widget.Error = err.Error()
+	}
 	widget.display()
 }
 
@@ -98,15 +108,19 @@ func (widget *Widget) isItemSelected() bool {
 }
 
 // Loads the todo list from3 Yaml file
-func (widget *Widget) load() {
+func (widget *Widget) load() error {
 	confDir, _ := cfg.WtfConfigDir()
 	filePath := fmt.Sprintf("%s/%s", confDir, widget.filePath)
 
-	fileData, _ := utils.ReadFileBytes(filePath)
+	fileData, err := utils.ReadFileBytes(filePath)
 
-	err := yaml.Unmarshal(fileData, &widget.list)
 	if err != nil {
-		return
+		return err
+	}
+
+	err = yaml.Unmarshal(fileData, &widget.list)
+	if err != nil {
+		return err
 	}
 
 	// do initial sort based on dates to make sure everything is correct
@@ -125,6 +139,7 @@ func (widget *Widget) load() {
 
 	widget.ScrollableWidget.SetItemCount(len(widget.list.Items))
 	widget.setItemChecks()
+	return nil
 }
 
 func (widget *Widget) newItem() {
@@ -294,7 +309,7 @@ func (widget *Widget) updateSelected() {
 	})
 }
 
-// processFormInput is a helper function that creates a form and calls onSave on the recieved input
+// processFormInput is a helper function that creates a form and calls onSave on the received input
 func (widget *Widget) processFormInput(prompt string, initValue string, onSave func(string)) {
 	form := widget.modalForm(prompt, initValue)
 
@@ -309,9 +324,8 @@ func (widget *Widget) processFormInput(prompt string, initValue string, onSave f
 	widget.addButtons(form, saveFctn)
 	widget.modalFocus(form)
 
-	widget.tviewApp.QueueUpdate(func() {
-		widget.tviewApp.Draw()
-	})
+	// Tell the app to force redraw the screen
+	widget.Base.RedrawChan <- true
 }
 
 // updateSelectedItem update the text of the selected item.
@@ -377,11 +391,12 @@ func (widget *Widget) addSaveButton(form *tview.Form, fctn func()) {
 }
 
 func (widget *Widget) modalFocus(form *tview.Form) {
-	widget.tviewApp.QueueUpdateDraw(func() {
-		frame := widget.modalFrame(form)
-		widget.pages.AddPage("modal", frame, false, true)
-		widget.tviewApp.SetFocus(frame)
-	})
+	frame := widget.modalFrame(form)
+	widget.pages.AddPage("modal", frame, false, true)
+	widget.tviewApp.SetFocus(frame)
+
+	// Tell the app to force redraw the screen
+	widget.Base.RedrawChan <- true
 }
 
 func (widget *Widget) modalForm(lbl, text string) *tview.Form {

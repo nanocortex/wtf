@@ -21,9 +21,9 @@ type Widget struct {
 	err      error
 }
 
-func NewWidget(tviewApp *tview.Application, pages *tview.Pages, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, settings *Settings) *Widget {
 	widget := &Widget{
-		ScrollableWidget: view.NewScrollableWidget(tviewApp, pages, settings.Common),
+		ScrollableWidget: view.NewScrollableWidget(tviewApp, redrawChan, pages, settings.Common),
 
 		settings: settings,
 	}
@@ -80,7 +80,7 @@ func (widget *Widget) content() (string, string, bool) {
 		}
 	}
 
-	title := fmt.Sprintf("UptimeRobot (%d/%d)", numUp, len(widget.monitors))
+	title := fmt.Sprintf("%s (%d/%d)", widget.CommonSettings().Title, numUp, len(widget.monitors))
 
 	if widget.err != nil {
 		return title, widget.err.Error(), true

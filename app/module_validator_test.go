@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/logrusorgru/aurora"
+	"github.com/logrusorgru/aurora/v4"
 	"github.com/olebedev/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/wtfutil/wtf/wtf"
@@ -76,7 +76,7 @@ func Test_validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			widget := MakeWidget(nil, nil, tt.moduleName, tt.config)
+			widget := MakeWidget(nil, nil, tt.moduleName, tt.config, make(chan bool))
 
 			if widget == nil {
 				t.Logf("Failed to create widget %s", tt.moduleName)

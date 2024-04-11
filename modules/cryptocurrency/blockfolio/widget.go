@@ -18,9 +18,9 @@ type Widget struct {
 	settings     *Settings
 }
 
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		device_token: settings.deviceToken,
 		settings:     settings,
@@ -88,7 +88,7 @@ func (widget *Widget) content() (string, string, bool) {
 	return title, res, true
 }
 
-//always the same
+// always the same
 const magic = "edtopjhgn2345piuty89whqejfiobh89-2q453"
 
 type Position struct {
@@ -106,7 +106,7 @@ type AllPositionsResponse struct {
 func MakeApiRequest(token string, method string) ([]byte, error) {
 	client := &http.Client{}
 	url := "https://api-v0.blockfolio.com/rest/" + method + "/" + token + "?use_alias=true&fiat_currency=USD"
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return nil, err
 	}

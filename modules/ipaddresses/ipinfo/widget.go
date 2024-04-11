@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	log "github.com/wtfutil/wtf/logger"
 	"net"
 	"net/http"
 	"text/template"
@@ -30,9 +31,9 @@ type ipinfo struct {
 	Organization string `json:"org"`
 }
 
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		settings: settings,
 	}
@@ -48,18 +49,18 @@ func (widget *Widget) Refresh() {
 	widget.Redraw(func() (string, string, bool) { return widget.CommonSettings().Title, widget.result, false })
 }
 
-//this method reads the config and calls ipinfo for ip information
+// this method reads the config and calls ipinfo for ip information
 func (widget *Widget) ipinfo() {
 	client := &http.Client{}
 	var url string
-	ip, ipv6 := getMyIP()
+	ip, ipv6 := getMyIP(widget.settings.protocolVersion)
 	if ipv6 {
 		url = fmt.Sprintf("https://ipinfo.io/%s", ip.String())
 	} else {
 		url = "https://ipinfo.io/"
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		widget.result = err.Error()
 		return
@@ -127,8 +128,11 @@ func formatableText(key, value string) string {
 // It does so by dialing out to a site known to have both an A and AAAA DNS records (IPv6)
 // The 'net' package is allowed to decide how to connect, connecting to both IPv4 or IPv6 address
 // depending on the availbility of IP protocols.
-func getMyIP() (ip net.IP, v6 bool) {
-	conn, err := net.Dial("tcp", "fast.com:80")
+func getMyIP(version protocolVersion) (ip net.IP, v6 bool) {
+	log.Log(fmt.Sprintf("Protocol version: %s", version))
+	log.Log(fmt.Sprintf("Network: %s", version.toNetwork()))
+	//fmt.Println("Protocol version: ", version)
+	conn, err := net.Dial(version.toNetwork(), "fast.com:80")
 	if err != nil {
 		return
 	}
@@ -139,4 +143,15 @@ func getMyIP() (ip net.IP, v6 bool) {
 	v6 = ip.To4() == nil
 
 	return
+}
+
+func (pv protocolVersion) toNetwork() string {
+	switch pv {
+	case ipV4:
+		return "tcp4"
+	case ipV6:
+		return "tcp6"
+	default:
+		return "tcp"
+	}
 }

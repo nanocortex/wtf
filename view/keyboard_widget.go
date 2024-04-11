@@ -2,11 +2,12 @@ package view
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/wtfutil/wtf/cfg"
 	"github.com/wtfutil/wtf/utils"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 const helpKeyChar = "/"
@@ -59,7 +60,8 @@ func (widget *KeyboardWidget) AssignedChars() []string {
 
 // HelpText returns the help text and keyboard command info for this widget
 func (widget *KeyboardWidget) HelpText() string {
-	str := " [green::b]Keyboard commands for " + strings.Title(widget.settings.Module.Type) + "[white]\n\n"
+	c := cases.Title(language.English)
+	str := " [green::b]Keyboard commands for " + c.String(widget.settings.Module.Type) + "[white]\n\n"
 
 	for _, item := range widget.charHelp {
 		str += fmt.Sprintf("  %s\t%s\n", item.Key, item.Text)
@@ -93,8 +95,7 @@ func (widget *KeyboardWidget) InitializeRefreshKeyboardControl(refreshFunc func(
 // InputCapture is the function passed to tview's SetInputCapture() function
 // This is done during the main widget's creation process using the following code:
 //
-//    widget.View.SetInputCapture(widget.InputCapture)
-//
+//	widget.View.SetInputCapture(widget.InputCapture)
 func (widget *KeyboardWidget) InputCapture(event *tcell.EventKey) *tcell.EventKey {
 	if event == nil {
 		return nil
@@ -129,8 +130,7 @@ func (widget *KeyboardWidget) LaunchDocumentation() {
 // SetKeyboardChar sets a character/function combination that responds to key presses
 // Example:
 //
-//    widget.SetKeyboardChar("d", widget.deleteSelectedItem)
-//
+//	widget.SetKeyboardChar("d", widget.deleteSelectedItem)
 func (widget *KeyboardWidget) SetKeyboardChar(char string, fn func(), helpText string) {
 	if char == "" {
 		return
@@ -148,8 +148,7 @@ func (widget *KeyboardWidget) SetKeyboardChar(char string, fn func(), helpText s
 // SetKeyboardKey sets a tcell.Key/function combination that responds to key presses
 // Example:
 //
-//    widget.SetKeyboardKey(tcell.KeyCtrlD, widget.deleteSelectedItem)
-//
+//	widget.SetKeyboardKey(tcell.KeyCtrlD, widget.deleteSelectedItem)
 func (widget *KeyboardWidget) SetKeyboardKey(key tcell.Key, fn func(), helpText string) {
 	widget.keyMap[key] = fn
 	widget.keyHelp = append(widget.keyHelp, helpItem{tcell.KeyNames[key], helpText})

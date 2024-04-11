@@ -23,9 +23,9 @@ type Widget struct {
 	settings *Settings
 }
 
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		Battery:        NewBattery(),
 		ManagedDevices: NewManagedDevices(),
@@ -71,8 +71,13 @@ func (widget *Widget) content() (string, string, bool) {
 		if manDev.HasBattery() {
 			percent := utils.ColorizePercent(float64(manDev.BatteryPercent()))
 
-			content += fmt.Sprintf(" %s: %s", manDev.Product()[:productNameTrimLen], percent)
-			content += "\n"
+			prodName := manDev.Product()
+
+			if len(prodName) > productNameTrimLen {
+				prodName = prodName[:productNameTrimLen]
+			}
+
+			content += fmt.Sprintf(" %s: %s\n", prodName, percent)
 		}
 	}
 

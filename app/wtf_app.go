@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/gdamore/tcell"
 	_ "github.com/gdamore/tcell/terminfo/extended"
-	"github.com/logrusorgru/aurora"
+	"github.com/gdamore/tcell/v2"
 	"github.com/olebedev/config"
 	"github.com/radovskyb/watcher"
 	"github.com/rivo/tview"
+
 	"github.com/wtfutil/wtf/cfg"
 	"github.com/wtfutil/wtf/support"
 	"github.com/wtfutil/wtf/utils"
@@ -31,6 +31,11 @@ type WtfApp struct {
 	pages          *tview.Pages
 	validator      *ModuleValidator
 	widgets        []wtf.Wtfable
+
+	// The redrawChan channel is used to allow modules to signal back to the main loop that
+	// the screen needs to be explicitly redrawn, instead of waiting for tcell to redraw
+	// on a user event, because something has visually changed
+	redrawChan chan bool
 }
 
 // NewWtfApp creates and returns an instance of WtfApp
@@ -41,6 +46,8 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		config:         config,
 		configFilePath: configFilePath,
 		pages:          tview.NewPages(),
+
+		redrawChan: make(chan bool, 1),
 	}
 
 	wtfApp.TViewApp.SetBeforeDrawFunc(func(s tcell.Screen) bool {
@@ -48,7 +55,12 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		return false
 	})
 
-	wtfApp.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config)
+	wtfApp.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
+	if len(wtfApp.widgets) == 0 {
+		fmt.Println("No modules were defined. Make sure you have at least one properly defined widget")
+		os.Exit(1)
+	}
+
 	wtfApp.display = NewDisplay(wtfApp.widgets, wtfApp.config)
 	wtfApp.focusTracker = NewFocusTracker(wtfApp.TViewApp, wtfApp.widgets, wtfApp.config)
 	wtfApp.validator = NewModuleValidator()
@@ -70,17 +82,46 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 	wtfApp.TViewApp.SetInputCapture(wtfApp.keyboardIntercept)
 	wtfApp.TViewApp.SetRoot(wtfApp.pages, true)
 
+	// Create a watcher to handle calls to redraw the screen
+	go handleRedraws(wtfApp.TViewApp, wtfApp.redrawChan)
+
 	return wtfApp
+}
+
+func handleRedraws(tviewApp *tview.Application, redrawChan chan bool) {
+	if redrawChan == nil {
+		return
+	}
+
+	for {
+		data, ok := <-redrawChan
+		if !ok {
+			return
+		}
+
+		if data {
+			tviewApp.Draw()
+		}
+	}
 }
 
 /* -------------------- Exported Functions -------------------- */
 
-// Run starts the underlying tview app
-func (wtfApp *WtfApp) Run() {
+// Exit quits the app
+func (wtfApp *WtfApp) Exit() {
+	wtfApp.Stop()
+	wtfApp.TViewApp.Stop()
+	wtfApp.DisplayExitMessage()
+	os.Exit(0)
+}
+
+// Execute starts the underlying tview app
+func (wtfApp *WtfApp) Execute() error {
 	if err := wtfApp.TViewApp.Run(); err != nil {
-		fmt.Printf("\n%s %v\n", aurora.Red("ERROR"), err)
-		os.Exit(1)
+		return err
 	}
+
+	return nil
 }
 
 // Start initializes the app
@@ -95,6 +136,7 @@ func (wtfApp *WtfApp) Start() {
 // Stop kills all the currently-running widgets in this app
 func (wtfApp *WtfApp) Stop() {
 	wtfApp.stopAllWidgets()
+	close(wtfApp.redrawChan)
 }
 
 /* -------------------- Unexported Functions -------------------- */
@@ -134,19 +176,11 @@ func (wtfApp *WtfApp) keyboardIntercept(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	}
 
-	// press q to exit wtf
-	switch string(event.Rune()) {
-	case "q":
-		wtfApp.Stop()
-		wtfApp.TViewApp.Stop()
-		wtfApp.DisplayExitMessage()
-		os.Exit(0)
-	default:
-	}
-
 	// If no specific widget has focus, then allow the key presses to fall through to the app
 	if !wtfApp.focusTracker.IsFocused {
 		switch string(event.Rune()) {
+		case "q":
+			wtfApp.Exit()
 		case "/":
 			return nil
 		default:

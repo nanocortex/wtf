@@ -31,7 +31,7 @@ type location struct {
 	status string
 }
 
-func GetLocationData(cityname string) (*location, error) {
+func getLocationData(cityname string) (*location, error) {
 	var locdata location
 	resp, err := apiRequest()
 	if err != nil {
@@ -55,7 +55,7 @@ func GetLocationData(cityname string) (*location, error) {
 /* -------------------- Unexported Functions -------------------- */
 
 func apiRequest() (*http.Response, error) {
-	req, err := http.NewRequest("GET", "https://uvdata.arpansa.gov.au/xml/uvvalues.xml", nil)
+	req, err := http.NewRequest("GET", "https://uvdata.arpansa.gov.au/xml/uvvalues.xml", http.NoBody)
 	if err != nil {
 		return nil, err
 	}

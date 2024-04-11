@@ -6,11 +6,14 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/creack/pty"
 	"github.com/rivo/tview"
+	"github.com/wtfutil/wtf/logger"
 	"github.com/wtfutil/wtf/view"
 )
 
@@ -27,9 +30,9 @@ type Widget struct {
 }
 
 // NewWidget creates a new instance of the widget
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		settings: settings,
 		buffer:   &bytes.Buffer{},
@@ -124,6 +127,7 @@ func runCommandLoop(widget *Widget) {
 		widget.resetBuffer()
 		cmd := exec.Command(widget.settings.cmd, widget.settings.args...)
 		cmd.Env = widget.environment()
+		cmd.Dir = widget.settings.workingDir
 		var err error
 		if widget.settings.pty {
 			err = runCommandPty(widget, cmd)
@@ -149,8 +153,28 @@ func runCommandPty(widget *Widget, cmd *exec.Cmd) error {
 		return err
 	}
 
+	// Make sure to close the pty at the end.
+	defer func() { _ = f.Close() }() // Best effort.
+
+	// Handle pty size.
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGWINCH)
+	go func() {
+		for range ch {
+			if err := pty.InheritSize(os.Stdin, f); err != nil {
+				logger.Log(fmt.Sprintf("error resizing pty: %s", err))
+			}
+		}
+	}()
+	ch <- syscall.SIGWINCH                        // Initial resize.
+	defer func() { signal.Stop(ch); close(ch) }() // Cleanup signals when done.
+
+	// Extract output
 	_, err = io.Copy(widget.buffer, f)
-	return err
+	if err != nil {
+		return err
+	}
+	return cmd.Wait()
 }
 
 func (widget *Widget) handleError(err error) {

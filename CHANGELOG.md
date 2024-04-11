@@ -4,7 +4,63 @@
 
 ### ⚡️ Added
 
+* [Pihole module](https://wtfutil.com/modules/pihole/) now supports auth token by [@elulcao](https://github.com/elulcao)
+
+### 🐞 Fixed
+
+* `handleRedraws()` function now stops properly when reading from a closed channel by [@Crash129](https://github.com/Crash129)
+
+## v0.43.0
+
+### ⚡️ Added
+
+* Added URLCheck tests by [@pliski](https://github.com/pliski)
+* Added protocol version to IpInfo module by [@vadeg](https://github.com/vadeg)
+* Upgrade CodeQL Module by [@Seanstoppable](https://github.com/Seanstoppable)
+* Updated to Go 1.19 by [@Seanstoppable](https://github.com/Seanstoppable)
+* Lunar Phase module added by [@doctorfree](https://github.com/doctorfree)
+* Lower default refreshing for resourceusage by [@Seanstoppable](https://github.com/Seanstoppable)
+* Pivotal tracker by [@reiktar](https://github.com/reiktar)
+* Progress module by [@michenriksen](https://github.com/michenriksen)
+
+### 🐞 Fixed
+
+* Fixed Git command for usage on windows by [@ibrahim-13](https://github.com/ibrahim-13)
+* Fixed Transmission module to use latest API by [@Seanstoppable](https://github.com/Seanstoppable)
+* Fixed Todoist module to use latest API by [@Seanstoppable](https://github.com/Seanstoppable)
+* Multiple library upgrades by [@Seanstoppable](https://github.com/Seanstoppable)
+* Better error handling for todo module by [@Seanstoppable](https://github.com/Seanstoppable)
+* Make gitlab scrolling consistent with other modules by [@Seanstoppable](https://github.com/Seanstoppable)
+* Make UptimeRobot title configurable like other modules by [@Seanstoppable](https://github.com/Seanstoppable)
+* Feed Reader improvements and reddit RSS bug fix by [@michenriksen](https://github.com/michenriksen)
+
+
+## v0.42.0
+
+### ⚡️ Added
+
 * [FeedReader module](https://wtfutil.com/modules/feedreader/) now displays the name of the parent feed in front of the feed item, [#1138](https://github.com/wtfutil/wtf/issues/1138) by [@igbanam](https://github.com/igbanam)
+* Steam Status module added by [@despreston](https://github.com/despreston)
+* Working directory option for CmdRunner, [#1293](https://github.com/wtfutil/wtf/issues/1293) by [@Seanstoppable](https://github.com/Seanstoppable)
+* Updated to Go 1.18, by [@Seanstoppable](https://github.com/Seanstoppable)
+* "compact" option added to [Weather module](https://wtfutil.com/modules/weather_services/weather/) by [@Bizzaro](https://github.com/Bizzaro)
+* Mempool cryptocurrency module by [@Bizzaro](https://github.com/Bizzaro)
+* [Nextbus module](http://nextbus.com) added by [@Bizzaro](https://github.com/Bizzaro)
+* URLCheck module added by [@pliski](https://github.com/pliski)
+* Twitch modules added by [@zyrre](https://github.com/zyrre)
+
+### 🐞 Fixed
+
+* [Spotify](https://wtfutil.com/modules/spotify/) module now properly displays the artist list, by [@inetAnt](https://github.com/inetAnt)
+* [Football](https://wtfutil.com/modules/sports/football/) module now uses HTTPS to connect to API, [#1183](https://github.com/wtfutil/wtf/issues/1183) by [@despreston](https://github.com/despreston)
+* [Jira module](https://wtfutil.com/modules/jira/) now properly escapes brackets in issue summary, by [@Eraac](https://github.com/Eraac)
+* [Pocket module](https://wtfutil.com/modules/pocket/) now properly handles empty lists, by [@asadali](https://github.com/asadali)
+* Twitch module OAuth token support added, UI improved, and underlying library upgraded, by [@despreston](https://github.com/despreston)
+* Typing "q" no longer quits the entire app every time, [#1257](https://github.com/wtfutil/wtf/issues/1257) by [@senorprogrammer](https://github.com/senorprogrammer)
+* Row highlighting properly terminates the highlight color, [#1280](https://github.com/wtfutil/wtf/issues/1280) by [@Seanstoppable](https://github.com/Seanstoppable)
+* Textfile widget properly displays text inside square brackets
+* CmdRunner doesn't continue to keep around processes in pty mode [#1225](https://github.com/wtfutil/wtf/issues/1225) by [@Seanstoppable](https://github.com/Seanstoppable)
+* Fix tag filtering in Todo module [#1172](https://github.com/wtfutil/wtf/issues/1225) by [@Seanstoppable](https://github.com/Seanstoppable)
 
 ## 0.41.0
 

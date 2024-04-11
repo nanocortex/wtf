@@ -17,9 +17,9 @@ type Widget struct {
 	settings *Settings
 }
 
-func NewWidget(tviewApp *tview.Application, settings *Settings) *Widget {
+func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Settings) *Widget {
 	widget := Widget{
-		TextWidget: view.NewTextWidget(tviewApp, nil, settings.Common),
+		TextWidget: view.NewTextWidget(tviewApp, redrawChan, nil, settings.Common),
 
 		settings: settings,
 	}
@@ -33,7 +33,7 @@ func (widget *Widget) Refresh() {
 	widget.Redraw(func() (string, string, bool) { return widget.CommonSettings().Title, widget.result, false })
 }
 
-//this method reads the config and calls wttr.in for pretty weather
+// this method reads the config and calls wttr.in for pretty weather
 func (widget *Widget) prettyWeather() {
 	client := &http.Client{}
 
@@ -41,7 +41,7 @@ func (widget *Widget) prettyWeather() {
 	unit := widget.settings.unit
 	view := widget.settings.view
 
-	req, err := http.NewRequest("GET", "https://wttr.in/"+city+"?"+view+"?"+unit, nil)
+	req, err := http.NewRequest("GET", "https://wttr.in/"+city+"?"+view+"?"+unit, http.NoBody)
 	if err != nil {
 		widget.result = err.Error()
 		return

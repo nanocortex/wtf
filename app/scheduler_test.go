@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	current = `
+	configExample = `
   wtf:
     mods:
       clocks:
@@ -46,7 +46,7 @@ func Test_RefreshInterval(t *testing.T) {
 			name:       "slow ticking module",
 			moduleName: "clocks",
 			config: func() *config.Config {
-				cfg, _ := config.ParseYaml(current)
+				cfg, _ := config.ParseYaml(configExample)
 				return cfg
 			}(),
 			testAttempts: 10,
@@ -66,7 +66,7 @@ func Test_RefreshInterval(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			widget := MakeWidget(nil, nil, tt.moduleName, tt.config)
+			widget := MakeWidget(nil, nil, tt.moduleName, tt.config, make(chan bool))
 
 			interval := widget.CommonSettings().RefreshInterval // same declaration as in scheduler.go#Schedule
 			timer := time.NewTicker(interval)
