@@ -51,8 +51,8 @@ github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMx
 github.com/VictorAvelar/devto-api-go v1.0.0 h1:oXmzye3xYvlgBX18vX4+v6LVbjoihgIokpeOpzeJzqU=
 github.com/VictorAvelar/devto-api-go v1.0.0/go.mod h1:gX13cqzMdpo49qP8VtBR2uCnzW7d76LFrAVSX2eLifY=
 github.com/acomagu/bufpipe v1.0.3/go.mod h1:mxdxdup/WdsKVreO5GpW4+M/1CE2sMG4jeGJ2sYmHc4=
-github.com/adlio/trello v1.10.0 h1:ia/rzoBwJJKr4IqnMlrU6n09CVqeyaahSkEVcV5/gPc=
-github.com/adlio/trello v1.10.0/go.mod h1:I4Lti4jf2KxjTNgTqs5W3lLuE78QZZdYbbPnQQGwjOo=
+github.com/adlio/trello v1.11.0 h1:PGpwpRZcRiVhsG7VEHb2GWKw4R2ZxB9nc6cMI/7mLD8=
+github.com/adlio/trello v1.11.0/go.mod h1:I4Lti4jf2KxjTNgTqs5W3lLuE78QZZdYbbPnQQGwjOo=
 github.com/alecthomas/chroma v0.10.0 h1:7XDcGkCQopCNKjZHfYrNLraA+M7e0fMiJ/Mfikbfjek=
 github.com/alecthomas/chroma v0.10.0/go.mod h1:jtJATyUxlIORhUOFNA9NZDWGAQ8wpxQQqNSB4rjA/1s=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
