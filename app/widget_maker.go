@@ -90,6 +90,7 @@ import (
 	"github.com/wtfutil/wtf/modules/weatherservices/weather"
 	"github.com/wtfutil/wtf/modules/zendesk"
 	"github.com/wtfutil/wtf/wtf"
+	"strconv"
 )
 
 // MakeWidget creates and returns instances of widgets
@@ -99,10 +100,13 @@ func MakeWidget(
 	moduleName string,
 	config *config.Config,
 	redrawChan chan bool,
+	screenIndex int,
 ) wtf.Wtfable {
 	var widget wtf.Wtfable
 
-	moduleConfig, _ := config.Get("wtf.mods." + moduleName)
+	path := "wtf.screens." + strconv.Itoa(screenIndex) + ".mods." + moduleName
+
+	moduleConfig, _ := config.Get(path)
 
 	// Don' try to initialize modules that don't exist
 	if moduleConfig == nil {
@@ -389,10 +393,12 @@ func MakeWidget(
 func MakeWidgets(tviewApp *tview.Application, pages *tview.Pages, config *config.Config, redrawChan chan bool) []wtf.Wtfable {
 	var widgets []wtf.Wtfable
 
-	moduleNames, _ := config.Map("wtf.mods")
+	screens, _ := config.List("wtf.screens")
+	screen := screens[0].(map[string]interface{})
+	moduleNames, _ := screen["mods"].(map[string]interface{})
 
 	for moduleName := range moduleNames {
-		widget := MakeWidget(tviewApp, pages, moduleName, config, redrawChan)
+		widget := MakeWidget(tviewApp, pages, moduleName, config, redrawChan, 0)
 
 		if widget != nil {
 			widgets = append(widgets, widget)

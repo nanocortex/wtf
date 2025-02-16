@@ -13,7 +13,6 @@ import (
 	"github.com/rivo/tview"
 
 	"github.com/wtfutil/wtf/cfg"
-	"github.com/wtfutil/wtf/support"
 	"github.com/wtfutil/wtf/utils"
 	"github.com/wtfutil/wtf/wtf"
 )
@@ -25,12 +24,13 @@ type WtfApp struct {
 
 	config         *config.Config
 	configFilePath string
-	display        *Display
-	focusTracker   FocusTracker
-	ghUser         *support.GitHubUser
 	pages          *tview.Pages
 	validator      *ModuleValidator
-	widgets        []wtf.Wtfable
+	// widgets        []wtf.Wtfable
+
+	screens []WtfScreen
+
+	currentScreen *WtfScreen
 
 	// The redrawChan channel is used to allow modules to signal back to the main loop that
 	// the screen needs to be explicitly redrawn, instead of waiting for tcell to redraw
@@ -38,14 +38,34 @@ type WtfApp struct {
 	redrawChan chan bool
 }
 
+type WtfScreen struct {
+	title        string
+	index        int
+	widgets      []wtf.Wtfable
+	display      *Display
+	focusTracker FocusTracker
+}
+
 // NewWtfApp creates and returns an instance of WtfApp
 func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePath string) *WtfApp {
+
+	tview.Borders.TopLeftFocus = tview.BoxDrawingsLightArcDownAndRight
+	tview.Borders.TopRightFocus = tview.BoxDrawingsLightArcDownAndLeft
+	tview.Borders.BottomLeftFocus = tview.BoxDrawingsLightArcUpAndRight
+	tview.Borders.BottomRightFocus = tview.BoxDrawingsLightArcUpAndLeft
+
+	tview.Borders.TopLeft = tview.BoxDrawingsLightArcDownAndRight
+	tview.Borders.TopRight = tview.BoxDrawingsLightArcDownAndLeft
+	tview.Borders.BottomLeft = tview.BoxDrawingsLightArcUpAndRight
+	tview.Borders.BottomRight = tview.BoxDrawingsLightArcUpAndLeft
+
 	wtfApp := &WtfApp{
 		TViewApp: tviewApp,
 
 		config:         config,
 		configFilePath: configFilePath,
 		pages:          tview.NewPages(),
+		screens:        []WtfScreen{},
 
 		redrawChan: make(chan bool, 1),
 	}
@@ -55,24 +75,52 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		return false
 	})
 
-	wtfApp.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
-	if len(wtfApp.widgets) == 0 {
-		fmt.Println("No modules were defined. Make sure you have at least one properly defined widget")
-		os.Exit(1)
+	// wtfApp.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
+	// if len(wtfApp.widgets) == 0 {
+	// 	fmt.Println("No modules were defined. Make sure you have at least one properly defined widget")
+	// 	os.Exit(1)
+	// }
+
+	// wtfApp.screens
+
+	screens, err := config.List("wtf.screens")
+	if err != nil {
+		log.Println("screens: ", err)
 	}
 
-	wtfApp.display = NewDisplay(wtfApp.widgets, wtfApp.config)
-	wtfApp.focusTracker = NewFocusTracker(wtfApp.TViewApp, wtfApp.widgets, wtfApp.config)
+	for _ = range screens {
+		s := WtfScreen{
+			title: "TEST",
+			index: 0,
+		}
+
+		wtfApp.screens = append(wtfApp.screens, s)
+	}
+
+	wtfApp.currentScreen = &wtfApp.screens[0]
+
+	wtfApp.currentScreen.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
+
+	// wtfApp.display = NewDisplay(wtfApp.widgets, wtfApp.config)
+	// wtfApp.focusTracker = NewFocusTracker(wtfApp.TViewApp, wtfApp.widgets, wtfApp.config)
+	// wtfApp.validator = NewModuleValidator()
+
+	// wtfApp.pages.AddPage("grid", wtfApp.display.Grid, true, true)
+
+	// wtfApp.validator.Validate(wtfApp.widgets)
+
+	// firstWidget := wtfApp.widgets[0]
+
+	wtfApp.currentScreen.display = NewDisplay(wtfApp.currentScreen.widgets, wtfApp.config)
+	wtfApp.currentScreen.focusTracker = NewFocusTracker(wtfApp.TViewApp, wtfApp.currentScreen.widgets, wtfApp.config)
 	wtfApp.validator = NewModuleValidator()
 
-	githubAPIKey := readGitHubAPIKey(wtfApp.config)
-	wtfApp.ghUser = support.NewGitHubUser(githubAPIKey)
+	wtfApp.pages.AddPage("grid", wtfApp.currentScreen.display.Grid, true, true)
 
-	wtfApp.pages.AddPage("grid", wtfApp.display.Grid, true, true)
+	wtfApp.validator.Validate(wtfApp.currentScreen.widgets)
 
-	wtfApp.validator.Validate(wtfApp.widgets)
+	firstWidget := wtfApp.currentScreen.widgets[0]
 
-	firstWidget := wtfApp.widgets[0]
 	wtfApp.pages.Box.SetBackgroundColor(
 		wtf.ColorFor(
 			firstWidget.CommonSettings().Colors.WidgetTheme.Background,
@@ -128,9 +176,6 @@ func (wtfApp *WtfApp) Execute() error {
 func (wtfApp *WtfApp) Start() {
 	go wtfApp.scheduleWidgets()
 	go wtfApp.watchForConfigChanges()
-
-	// FIXME: This should be moved to the AppManager
-	go func() { _ = wtfApp.ghUser.Load() }()
 }
 
 // Stop kills all the currently-running widgets in this app
@@ -142,7 +187,7 @@ func (wtfApp *WtfApp) Stop() {
 /* -------------------- Unexported Functions -------------------- */
 
 func (wtfApp *WtfApp) stopAllWidgets() {
-	for _, widget := range wtfApp.widgets {
+	for _, widget := range wtfApp.currentScreen.widgets {
 		widget.Stop()
 	}
 }
@@ -163,21 +208,21 @@ func (wtfApp *WtfApp) keyboardIntercept(event *tcell.EventKey) *tcell.EventKey {
 		fmt.Println("Next app")
 		return nil
 	case tcell.KeyTab:
-		wtfApp.focusTracker.Next()
+		wtfApp.currentScreen.focusTracker.Next()
 	case tcell.KeyBacktab:
-		wtfApp.focusTracker.Prev()
+		wtfApp.currentScreen.focusTracker.Prev()
 		return nil
 	case tcell.KeyEsc:
-		wtfApp.focusTracker.None()
+		wtfApp.currentScreen.focusTracker.None()
 	}
 
 	// Checks to see if any widget has been assigned the pressed key as its focus key
-	if wtfApp.focusTracker.FocusOn(string(event.Rune())) {
+	if wtfApp.currentScreen.focusTracker.FocusOn(string(event.Rune())) {
 		return nil
 	}
 
 	// If no specific widget has focus, then allow the key presses to fall through to the app
-	if !wtfApp.focusTracker.IsFocused {
+	if !wtfApp.currentScreen.focusTracker.IsFocused {
 		switch string(event.Rune()) {
 		case "q":
 			wtfApp.Exit()
@@ -191,13 +236,13 @@ func (wtfApp *WtfApp) keyboardIntercept(event *tcell.EventKey) *tcell.EventKey {
 }
 
 func (wtfApp *WtfApp) refreshAllWidgets() {
-	for _, widget := range wtfApp.widgets {
+	for _, widget := range wtfApp.currentScreen.widgets {
 		go widget.Refresh()
 	}
 }
 
 func (wtfApp *WtfApp) scheduleWidgets() {
-	for _, widget := range wtfApp.widgets {
+	for _, widget := range wtfApp.currentScreen.widgets {
 		go Schedule(widget)
 	}
 }

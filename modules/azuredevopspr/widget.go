@@ -7,6 +7,7 @@ import (
 	azrGit "github.com/microsoft/azure-devops-go-api/azuredevops/git"
 	"github.com/pkg/errors"
 	"github.com/rivo/tview"
+	log "github.com/wtfutil/wtf/logger"
 	"github.com/wtfutil/wtf/utils"
 	"github.com/wtfutil/wtf/view"
 	"time"
@@ -57,6 +58,8 @@ func (widget *Widget) Refresh() {
 
 	itemCount := 0
 
+	log.Log("Refreshing pull requests")
+
 	for _, project := range projects {
 		pullRequests, err := widget.getMyPullRequests(project)
 		if err != nil {
@@ -70,6 +73,7 @@ func (widget *Widget) Refresh() {
 
 	for _, project := range projects {
 		pullRequests, err := widget.getMyReviewPullRequests(project)
+		log.Log(fmt.Sprintf("Found %d pull requests to review", len(pullRequests)))
 		if err != nil {
 			widget.err = err
 			widget.myReviewPullRequests = nil
@@ -97,14 +101,18 @@ func (widget *Widget) content() (string, string, bool) {
 		return title, widget.err.Error(), true
 	}
 
-	if len(widget.myPullRequests) == 0 {
+	if len(widget.myPullRequests) == 0 && len(widget.myReviewPullRequests) == 0 {
 		return title, "No pull requests to display", false
 	}
 
 	var str string
-	str += widget.displayPullRequests("Created by me", widget.myPullRequests, 0)
-	str += "\n"
-	str += widget.displayPullRequests("To review by me", widget.myReviewPullRequests, len(widget.myPullRequests))
+	if len(widget.myPullRequests) > 0 {
+		str += widget.displayPullRequests("Created by me", widget.myPullRequests, 0)
+		str += "\n"
+	}
+	if len(widget.myReviewPullRequests) > 0 {
+		str += widget.displayPullRequests("To review by me", widget.myReviewPullRequests, len(widget.myPullRequests))
+	}
 
 	return title, str, false
 }

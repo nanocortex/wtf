@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/rivo/tview"
 	"log"
 	"os"
 
@@ -26,19 +27,19 @@ import (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// Parse and handle flags
-	flags := flags.NewFlags()
-	flags.Parse()
+	// Parse and handle f
+	f := flags.NewFlags()
+	f.Parse()
 
 	// Load the configuration file
-	cfg.Initialize(flags.HasCustomConfig())
-	config := cfg.LoadWtfConfigFile(flags.ConfigFilePath())
+	cfg.Initialize(f.HasCustomConfig())
+	config := cfg.LoadWtfConfigFile(f.ConfigFilePath())
 
 	wtf.SetTerminal(config)
 
-	flags.RenderIf(config)
+	f.RenderIf(config)
 
-	if flags.Profile {
+	if f.Profile {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
@@ -46,17 +47,10 @@ func main() {
 	openURLUtil := utils.ToStrs(config.UList("wtf.openUrlUtil", []interface{}{}))
 	utils.Init(openFileUtil, openURLUtil)
 
-	/* Initialize the App Manager */
-	appMan := app.NewAppManager()
-	appMan.MakeNewWtfApp(config, flags.Config)
+	currentApp := app.NewWtfApp(tview.NewApplication(), config, f.ConfigFilePath())
+	currentApp.Start()
+	err := currentApp.Execute()
 
-	currentApp, err := appMan.Current()
-	if err != nil {
-		fmt.Printf("\n%s %v\n", aurora.Red("ERROR"), err)
-		os.Exit(1)
-	}
-
-	err = currentApp.Execute()
 	if err != nil {
 		fmt.Printf("\n%s %v\n", aurora.Red("ERROR"), err)
 		os.Exit(1)

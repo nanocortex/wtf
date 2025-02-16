@@ -41,11 +41,9 @@ func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.P
 func getBackend(backendType string) backend.Backend {
 	switch backendType {
 	case "trello":
-		backend := &backend.Trello{}
-		return backend
+		return &backend.Trello{}
 	case "todoist":
-		backend := &backend.Todoist{}
-		return backend
+		return &backend.Todoist{}
 	default:
 		log.Fatal(backendType + " is not a supported backend")
 		return nil

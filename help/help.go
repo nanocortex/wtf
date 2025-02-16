@@ -23,7 +23,7 @@ func helpFor(moduleName string, cfg *config.Config) string {
 		return ""
 	}
 
-	widget := app.MakeWidget(nil, nil, moduleName, cfg, nil)
+	widget := app.MakeWidget(nil, nil, moduleName, cfg, nil, 0)
 
 	// Since we are forcing enabled config, if no module
 	// exists, we will get the unknown one
