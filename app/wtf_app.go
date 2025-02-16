@@ -75,23 +75,18 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		return false
 	})
 
-	// wtfApp.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
-	// if len(wtfApp.widgets) == 0 {
-	// 	fmt.Println("No modules were defined. Make sure you have at least one properly defined widget")
-	// 	os.Exit(1)
-	// }
-
-	// wtfApp.screens
+	// TODO: lazy loading of widget on not loaded screens
 
 	screens, err := config.List("wtf.screens")
 	if err != nil {
 		log.Println("screens: ", err)
 	}
 
-	for _ = range screens {
+	for _, ss := range screens {
+		screen := ss.(map[string]interface{})
 		s := WtfScreen{
-			title: "TEST",
-			index: 0,
+			title: screen["title"].(string),
+			index: screen["index"].(int),
 		}
 
 		wtfApp.screens = append(wtfApp.screens, s)
@@ -101,21 +96,17 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 
 	wtfApp.currentScreen.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
 
-	// wtfApp.display = NewDisplay(wtfApp.widgets, wtfApp.config)
-	// wtfApp.focusTracker = NewFocusTracker(wtfApp.TViewApp, wtfApp.widgets, wtfApp.config)
-	// wtfApp.validator = NewModuleValidator()
-
-	// wtfApp.pages.AddPage("grid", wtfApp.display.Grid, true, true)
-
-	// wtfApp.validator.Validate(wtfApp.widgets)
-
-	// firstWidget := wtfApp.widgets[0]
-
-	wtfApp.currentScreen.display = NewDisplay(wtfApp.currentScreen.widgets, wtfApp.config)
+	wtfApp.currentScreen.display = NewDisplay(wtfApp.screens, wtfApp.currentScreen.widgets, wtfApp.config)
 	wtfApp.currentScreen.focusTracker = NewFocusTracker(wtfApp.TViewApp, wtfApp.currentScreen.widgets, wtfApp.config)
 	wtfApp.validator = NewModuleValidator()
 
-	wtfApp.pages.AddPage("grid", wtfApp.currentScreen.display.Grid, true, true)
+	flex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(wtfApp.currentScreen.display.TabBar, 1, 0, false).
+		AddItem(wtfApp.currentScreen.display.Grid, 0, 10, true)
+
+	wtfApp.pages.AddPage("grid", flex, true, true)
+	//wtfApp.pages.AddPage("grid", wtfApp.currentScreen.display.Grid, true, true)
 
 	wtfApp.validator.Validate(wtfApp.currentScreen.widgets)
 

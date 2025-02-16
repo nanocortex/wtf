@@ -27,19 +27,19 @@ import (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// Parse and handle f
-	f := flags.NewFlags()
-	f.Parse()
+	// Parse and handle flags
+	flags := flags.NewFlags()
+	flags.Parse()
 
 	// Load the configuration file
-	cfg.Initialize(f.HasCustomConfig())
-	config := cfg.LoadWtfConfigFile(f.ConfigFilePath())
+	cfg.Initialize(flags.HasCustomConfig())
+	config := cfg.LoadWtfConfigFile(flags.ConfigFilePath())
 
 	wtf.SetTerminal(config)
 
-	f.RenderIf(config)
+	flags.RenderIf(config)
 
-	if f.Profile {
+	if flags.Profile {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
@@ -47,9 +47,9 @@ func main() {
 	openURLUtil := utils.ToStrs(config.UList("wtf.openUrlUtil", []interface{}{}))
 	utils.Init(openFileUtil, openURLUtil)
 
-	currentApp := app.NewWtfApp(tview.NewApplication(), config, f.ConfigFilePath())
-	currentApp.Start()
-	err := currentApp.Execute()
+	wtfApp := app.NewWtfApp(tview.NewApplication(), config, flags.ConfigFilePath())
+	wtfApp.Start()
+	err := wtfApp.Execute()
 
 	if err != nil {
 		fmt.Printf("\n%s %v\n", aurora.Red("ERROR"), err)
