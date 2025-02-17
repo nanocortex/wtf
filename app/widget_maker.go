@@ -390,15 +390,15 @@ func MakeWidget(
 }
 
 // MakeWidgets creates and returns a collection of enabled widgets
-func MakeWidgets(tviewApp *tview.Application, pages *tview.Pages, config *config.Config, redrawChan chan bool) []wtf.Wtfable {
+func MakeWidgets(wtfApp *WtfApp) []wtf.Wtfable {
 	var widgets []wtf.Wtfable
 
-	screens, _ := config.List("wtf.screens")
-	screen := screens[0].(map[string]interface{})
+	screens, _ := wtfApp.config.List("wtf.screens")
+	screen := screens[wtfApp.currentScreen.index-1].(map[string]interface{})
 	moduleNames, _ := screen["mods"].(map[string]interface{})
 
 	for moduleName := range moduleNames {
-		widget := MakeWidget(tviewApp, pages, moduleName, config, redrawChan, 0)
+		widget := MakeWidget(wtfApp.TViewApp, wtfApp.pages, moduleName, wtfApp.config, wtfApp.redrawChan, wtfApp.currentScreen.index-1)
 
 		if widget != nil {
 			widgets = append(widgets, widget)

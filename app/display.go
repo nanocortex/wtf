@@ -17,22 +17,22 @@ type Display struct {
 }
 
 // NewDisplay creates and returns a Display
-func NewDisplay(screens []WtfScreen, widgets []wtf.Wtfable, config *config.Config) *Display {
+func NewDisplay(wtfApp *WtfApp) *Display {
 	display := Display{
 		TabBar:    tview.NewFlex(),
 		Grid:      tview.NewGrid(),
 		Container: tview.NewFlex(),
-		config:    config,
+		config:    wtfApp.config,
 	}
 
-	firstWidget := widgets[0]
+	firstWidget := wtfApp.currentScreen.widgets[0]
 	display.Grid.SetBackgroundColor(
 		wtf.ColorFor(
 			firstWidget.CommonSettings().Colors.WidgetTheme.Background,
 		),
 	)
 
-	display.build(screens, widgets)
+	display.build(wtfApp)
 
 	return &display
 }
@@ -56,7 +56,7 @@ func (display *Display) add(widget wtf.Wtfable) {
 	)
 }
 
-func (display *Display) build(screens []WtfScreen, widgets []wtf.Wtfable) {
+func (display *Display) build(wtfApp *WtfApp) {
 	cols := utils.ToInts(display.config.UList("wtf.grid.columns"))
 	rows := utils.ToInts(display.config.UList("wtf.grid.rows"))
 
@@ -64,17 +64,24 @@ func (display *Display) build(screens []WtfScreen, widgets []wtf.Wtfable) {
 	display.Grid.SetRows(rows...)
 	display.Grid.SetBorder(false)
 
-	for _, widget := range widgets {
+	for _, widget := range wtfApp.currentScreen.widgets {
 		display.add(widget)
 	}
 
-	for i, screen := range screens {
+	firstWidget := wtfApp.currentScreen.widgets[0]
+	for _, screen := range wtfApp.screens {
 		tv := tview.NewTextView()
-		tv.SetText(fmt.Sprintf("%d: %v", i, screen.title))
+		tv.SetText(fmt.Sprintf("%d: %v", screen.index, screen.title))
+		if screen.index == wtfApp.currentScreen.index {
+			tv.SetTextColor(tview.Styles.InverseTextColor)
+		}
+
+		tv.SetBackgroundColor(
+			wtf.ColorFor(
+				firstWidget.CommonSettings().Colors.WidgetTheme.Background,
+			),
+		)
+
 		display.TabBar.AddItem(tv, 0, 1, false)
 	}
-
-	//display.TabBar.SetDirection(tview.FlexColumn)
-	//display.TabBar.SetBorder(true)
-
 }
