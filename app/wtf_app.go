@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	_ "github.com/gdamore/tcell/terminfo/extended"
@@ -13,6 +14,7 @@ import (
 	"github.com/rivo/tview"
 
 	"github.com/wtfutil/wtf/cfg"
+	logger "github.com/wtfutil/wtf/logger"
 	"github.com/wtfutil/wtf/utils"
 	"github.com/wtfutil/wtf/wtf"
 )
@@ -26,7 +28,6 @@ type WtfApp struct {
 	configFilePath string
 	pages          *tview.Pages
 	validator      *ModuleValidator
-	// widgets        []wtf.Wtfable
 
 	screens []WtfScreen
 
@@ -44,6 +45,7 @@ type WtfScreen struct {
 	widgets      []wtf.Wtfable
 	display      *Display
 	focusTracker FocusTracker
+	mnemonic     string
 }
 
 // NewWtfApp creates and returns an instance of WtfApp
@@ -75,8 +77,6 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		return false
 	})
 
-	// TODO: lazy loading of widget on not loaded screens
-
 	screens, err := config.List("wtf.screens")
 	if err != nil {
 		log.Println("screens: ", err)
@@ -92,11 +92,51 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		wtfApp.screens = append(wtfApp.screens, s)
 	}
 
-	wtfApp.currentScreen = &wtfApp.screens[0]
+	wtfApp.initPage(1)
 
-	wtfApp.currentScreen.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
+	firstWidget := wtfApp.currentScreen.widgets[0]
+	wtfApp.pages.Box.SetBackgroundColor(
+		wtf.ColorFor(
+			firstWidget.CommonSettings().Colors.WidgetTheme.Background,
+		),
+	)
 
-	wtfApp.currentScreen.display = NewDisplay(wtfApp.screens, wtfApp.currentScreen.widgets, wtfApp.config)
+	wtfApp.TViewApp.SetRoot(wtfApp.pages, true)
+
+	wtfApp.TViewApp.SetInputCapture(wtfApp.keyboardIntercept)
+
+	go handleRedraws(wtfApp.TViewApp, wtfApp.redrawChan)
+
+	return wtfApp
+}
+
+func (wtfApp *WtfApp) getScreenByIndex(index int) *WtfScreen {
+	for _, screen := range wtfApp.screens {
+		if screen.index == index {
+			return &screen
+		}
+	}
+	return nil
+}
+
+func (wtfApp *WtfApp) initPage(index int) {
+
+	newScreen := wtfApp.getScreenByIndex(index)
+
+	if newScreen == nil {
+		return
+	}
+
+	currentScreen := wtfApp.currentScreen
+	if currentScreen != nil {
+		currentScreen.stopAllWidgets()
+		wtfApp.pages.RemovePage("grid" + strconv.Itoa(currentScreen.index))
+	}
+
+	wtfApp.currentScreen = newScreen
+
+	wtfApp.currentScreen.widgets = MakeWidgets(wtfApp)
+	wtfApp.currentScreen.display = NewDisplay(wtfApp)
 	wtfApp.currentScreen.focusTracker = NewFocusTracker(wtfApp.TViewApp, wtfApp.currentScreen.widgets, wtfApp.config)
 	wtfApp.validator = NewModuleValidator()
 
@@ -105,26 +145,22 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		AddItem(wtfApp.currentScreen.display.TabBar, 1, 0, false).
 		AddItem(wtfApp.currentScreen.display.Grid, 0, 10, true)
 
-	wtfApp.pages.AddPage("grid", flex, true, true)
-	//wtfApp.pages.AddPage("grid", wtfApp.currentScreen.display.Grid, true, true)
+	wtfApp.pages.AddPage("grid"+strconv.Itoa(wtfApp.currentScreen.index), flex, true, true)
+
+	wtfApp.pages.SwitchToPage("grid" + strconv.Itoa(wtfApp.currentScreen.index))
+
+	wtfApp.TViewApp.SetRoot(wtfApp.pages, true)
 
 	wtfApp.validator.Validate(wtfApp.currentScreen.widgets)
 
-	firstWidget := wtfApp.currentScreen.widgets[0]
-
-	wtfApp.pages.Box.SetBackgroundColor(
-		wtf.ColorFor(
-			firstWidget.CommonSettings().Colors.WidgetTheme.Background,
-		),
-	)
-
-	wtfApp.TViewApp.SetInputCapture(wtfApp.keyboardIntercept)
-	wtfApp.TViewApp.SetRoot(wtfApp.pages, true)
-
 	// Create a watcher to handle calls to redraw the screen
-	go handleRedraws(wtfApp.TViewApp, wtfApp.redrawChan)
+	go wtfApp.scheduleWidgets()
+}
 
-	return wtfApp
+func (wtfApp *WtfApp) changeScreen(screenIndex int) {
+	logger.Log(fmt.Sprintf("Changing to screen: %d", screenIndex))
+	wtfApp.initPage(screenIndex)
+
 }
 
 func handleRedraws(tviewApp *tview.Application, redrawChan chan bool) {
@@ -165,25 +201,31 @@ func (wtfApp *WtfApp) Execute() error {
 
 // Start initializes the app
 func (wtfApp *WtfApp) Start() {
-	go wtfApp.scheduleWidgets()
+	//go wtfApp.scheduleWidgets()
 	go wtfApp.watchForConfigChanges()
 }
 
 // Stop kills all the currently-running widgets in this app
 func (wtfApp *WtfApp) Stop() {
-	wtfApp.stopAllWidgets()
+	wtfApp.currentScreen.stopAllWidgets()
 	close(wtfApp.redrawChan)
 }
 
 /* -------------------- Unexported Functions -------------------- */
 
-func (wtfApp *WtfApp) stopAllWidgets() {
-	for _, widget := range wtfApp.currentScreen.widgets {
+func (wtfScreen *WtfScreen) stopAllWidgets() {
+	if wtfScreen == nil {
+		return
+	}
+	for _, widget := range wtfScreen.widgets {
 		widget.Stop()
 	}
 }
 
 func (wtfApp *WtfApp) keyboardIntercept(event *tcell.EventKey) *tcell.EventKey {
+
+	logger.Log(fmt.Sprintf("Key: %d", event.Key()))
+
 	// These keys are global keys used by the app. Widgets should not implement these keys
 	switch event.Key() {
 	case tcell.KeyCtrlC:
@@ -207,10 +249,17 @@ func (wtfApp *WtfApp) keyboardIntercept(event *tcell.EventKey) *tcell.EventKey {
 		wtfApp.currentScreen.focusTracker.None()
 	}
 
-	// Checks to see if any widget has been assigned the pressed key as its focus key
-	if wtfApp.currentScreen.focusTracker.FocusOn(string(event.Rune())) {
-		return nil
+	// check if the key is a number and ctrl
+	logger.Log(fmt.Sprintf("Key: %d", event.Key()))
+	logger.Log(fmt.Sprintf("Modifier: %d", event.Modifiers()))
+	if event.Rune() >= '0' && event.Rune() <= '9' {
+		wtfApp.changeScreen(int(event.Rune() - '0'))
 	}
+
+	// Checks to see if any widget has been assigned the pressed key as its focus key
+	//if wtfApp.currentScreen.focusTracker.FocusOn(string(event.Rune())) {
+	//	return nil
+	//}
 
 	// If no specific widget has focus, then allow the key presses to fall through to the app
 	if !wtfApp.currentScreen.focusTracker.IsFocused {

@@ -26,6 +26,7 @@ import (
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetOutput(os.Stdout)
 
 	// Parse and handle flags
 	flags := flags.NewFlags()
