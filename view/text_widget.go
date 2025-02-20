@@ -1,6 +1,7 @@
 package view
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/rivo/tview"
@@ -49,6 +50,10 @@ func (widget *TextWidget) Redraw(data func() (string, string, bool)) {
 	widget.View.SetText(strings.TrimRight(content, "\n"))
 
 	widget.RedrawChan <- true
+}
+
+func (widget *TextWidget) LabelValue(key, value string) string {
+	return fmt.Sprintf("[%s]%8s[-:-:-] %s\n", widget.commonSettings.Colors.Subheading, key, value)
 }
 
 /* -------------------- Unexported Functions -------------------- */

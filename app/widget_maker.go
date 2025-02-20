@@ -42,6 +42,7 @@ import (
 	"github.com/wtfutil/wtf/modules/hackernews"
 	"github.com/wtfutil/wtf/modules/healthchecks"
 	"github.com/wtfutil/wtf/modules/hibp"
+	"github.com/wtfutil/wtf/modules/ids"
 	"github.com/wtfutil/wtf/modules/ipaddresses/ipapi"
 	"github.com/wtfutil/wtf/modules/ipaddresses/ipinfo"
 	"github.com/wtfutil/wtf/modules/jenkins"
@@ -52,8 +53,10 @@ import (
 	"github.com/wtfutil/wtf/modules/lunarphase"
 	"github.com/wtfutil/wtf/modules/mercurial"
 	"github.com/wtfutil/wtf/modules/nbascore"
+	"github.com/wtfutil/wtf/modules/network"
 	"github.com/wtfutil/wtf/modules/newrelic"
 	"github.com/wtfutil/wtf/modules/nextbus"
+	"github.com/wtfutil/wtf/modules/nextdns"
 	"github.com/wtfutil/wtf/modules/opsgenie"
 	"github.com/wtfutil/wtf/modules/pagerduty"
 	"github.com/wtfutil/wtf/modules/pihole"
@@ -74,7 +77,7 @@ import (
 	"github.com/wtfutil/wtf/modules/subreddit"
 	"github.com/wtfutil/wtf/modules/textfile"
 	"github.com/wtfutil/wtf/modules/todo"
-	"github.com/wtfutil/wtf/modules/todo_plus"
+	"github.com/wtfutil/wtf/modules/todoist"
 	"github.com/wtfutil/wtf/modules/transmission"
 	"github.com/wtfutil/wtf/modules/travisci"
 	"github.com/wtfutil/wtf/modules/twitch"
@@ -82,6 +85,7 @@ import (
 	"github.com/wtfutil/wtf/modules/twitterstats"
 	"github.com/wtfutil/wtf/modules/unknown"
 	"github.com/wtfutil/wtf/modules/updown"
+	"github.com/wtfutil/wtf/modules/uptimekuma"
 	"github.com/wtfutil/wtf/modules/uptimerobot"
 	"github.com/wtfutil/wtf/modules/urlcheck"
 	"github.com/wtfutil/wtf/modules/victorops"
@@ -237,6 +241,9 @@ func MakeWidget(
 	case "hibp":
 		settings := hibp.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = hibp.NewWidget(tviewApp, redrawChan, settings)
+	case "ids":
+		settings := ids.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = ids.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "ipapi":
 		settings := ipapi.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = ipapi.NewWidget(tviewApp, redrawChan, settings)
@@ -270,12 +277,18 @@ func MakeWidget(
 	case "nbascore":
 		settings := nbascore.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = nbascore.NewWidget(tviewApp, redrawChan, pages, settings)
+	case "network":
+		settings := network.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = network.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "newrelic":
 		settings := newrelic.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = newrelic.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "nextbus":
 		settings := nextbus.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = nextbus.NewWidget(tviewApp, redrawChan, pages, settings)
+	case "nextdns":
+		settings := nextdns.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = nextdns.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "opsgenie":
 		settings := opsgenie.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = opsgenie.NewWidget(tviewApp, redrawChan, settings)
@@ -330,21 +343,15 @@ func MakeWidget(
 	case "todo":
 		settings := todo.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = todo.NewWidget(tviewApp, redrawChan, pages, settings)
-	case "todo_plus":
-		settings := todo_plus.NewSettingsFromYAML(moduleName, moduleConfig, config)
-		widget = todo_plus.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "todoist":
-		settings := todo_plus.FromTodoist(moduleName, moduleConfig, config)
-		widget = todo_plus.NewWidget(tviewApp, redrawChan, pages, settings)
+		settings := todoist.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = todoist.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "transmission":
 		settings := transmission.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = transmission.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "travisci":
 		settings := travisci.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = travisci.NewWidget(tviewApp, redrawChan, pages, settings)
-	case "trello":
-		settings := todo_plus.FromTrello(moduleName, moduleConfig, config)
-		widget = todo_plus.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "twitch":
 		settings := twitch.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = twitch.NewWidget(tviewApp, redrawChan, pages, settings)
@@ -357,6 +364,9 @@ func MakeWidget(
 	case "updown":
 		settings := updown.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = updown.NewWidget(tviewApp, redrawChan, pages, settings)
+	case "uptimekuma":
+		settings := uptimekuma.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = uptimekuma.NewWidget(tviewApp, redrawChan, pages, settings)
 	case "uptimerobot":
 		settings := uptimerobot.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = uptimerobot.NewWidget(tviewApp, redrawChan, pages, settings)

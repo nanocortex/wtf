@@ -73,14 +73,14 @@ func (display *Display) build(wtfApp *WtfApp) {
 		tv := tview.NewTextView()
 		tv.SetText(fmt.Sprintf("%d: %v", screen.index, screen.title))
 		if screen.index == wtfApp.currentScreen.index {
-			tv.SetTextColor(tview.Styles.InverseTextColor)
+			tv.SetBackgroundColor(tview.Styles.InverseTextColor)
+		} else {
+			tv.SetBackgroundColor(
+				wtf.ColorFor(
+					firstWidget.CommonSettings().Colors.WidgetTheme.Background,
+				),
+			)
 		}
-
-		tv.SetBackgroundColor(
-			wtf.ColorFor(
-				firstWidget.CommonSettings().Colors.WidgetTheme.Background,
-			),
-		)
 
 		display.TabBar.AddItem(tv, 0, 1, false)
 	}

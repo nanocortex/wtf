@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/rivo/tview"
 	"github.com/wtfutil/wtf/utils"
@@ -16,6 +17,8 @@ type Widget struct {
 	stories  []Story
 	settings *Settings
 	err      error
+
+	tviewApp *tview.Application
 }
 
 func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.Pages, settings *Settings) *Widget {
@@ -23,6 +26,7 @@ func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.P
 		ScrollableWidget: view.NewScrollableWidget(tviewApp, redrawChan, pages, settings.Common),
 
 		settings: settings,
+		tviewApp: tviewApp,
 	}
 
 	widget.SetRenderFunction(widget.Render)
@@ -38,22 +42,7 @@ func (widget *Widget) Refresh() {
 		return
 	}
 
-	storyIds, err := GetStories(widget.settings.storyType)
-	if err != nil {
-		widget.err = err
-		widget.stories = nil
-		widget.SetItemCount(0)
-	} else {
-		var stories []Story
-		for idx := 0; idx < widget.settings.numberOfStories; idx++ {
-			story, e := GetStory(storyIds[idx])
-			if e == nil {
-				stories = append(stories, story)
-			}
-		}
-		widget.stories = stories
-		widget.SetItemCount(len(stories))
-	}
+	widget.fetchStoriesAsync()
 
 	widget.Render()
 }
@@ -64,6 +53,60 @@ func (widget *Widget) Render() {
 }
 
 /* -------------------- Unexported Functions -------------------- */
+
+// Create a function to fetch stories concurrently
+func (widget *Widget) fetchStoriesAsync() {
+	// Start fetching stories in a goroutine
+	go func() {
+		defer widget.Render()
+		storyIds, err := GetStories(widget.settings.storyType)
+		if err != nil {
+			// Handle error in the main thread
+			widget.tviewApp.QueueUpdateDraw(func() {
+				widget.err = err
+				widget.stories = nil
+				widget.SetItemCount(0)
+				widget.Render()
+			})
+			return
+		}
+
+		// Create a channel to collect stories
+		storyChan := make(chan Story)
+		var wg sync.WaitGroup
+
+		// Launch goroutines for each story fetch
+		for idx := 0; idx < widget.settings.numberOfStories && idx < len(storyIds); idx++ {
+			wg.Add(1)
+			go func(id int) {
+				defer wg.Done()
+				story, err := GetStory(id)
+				if err == nil {
+					storyChan <- story
+				}
+			}(storyIds[idx])
+		}
+
+		// Wait for all goroutines to complete in a separate goroutine
+		go func() {
+			wg.Wait()
+			close(storyChan)
+		}()
+
+		// Initialize stories slice
+		widget.stories = make([]Story, 0, widget.settings.numberOfStories)
+
+		// Read from channel and update widget for each story
+		for story := range storyChan {
+			widget.tviewApp.QueueUpdateDraw(func() {
+				widget.stories = append(widget.stories, story)
+				widget.SetItemCount(len(widget.stories))
+				widget.Render()
+			})
+		}
+
+	}()
+}
 
 func (widget *Widget) content() (string, string, bool) {
 	title := fmt.Sprintf("%s - %s stories", widget.CommonSettings().Title, widget.settings.storyType)
